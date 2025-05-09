@@ -2,6 +2,7 @@ package com.nhnacademy.gateway.gate.controller;
 
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.dto.GateResponse;
+import com.nhnacademy.gateway.gate.dto.GateSummaryResponse;
 import com.nhnacademy.gateway.gate.service.GateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/gates")
@@ -37,6 +40,18 @@ public class GateController {
                 .ok(gateResponse);
     }
 
+    @GetMapping("/list")
+    public ResponseEntity<List<GateSummaryResponse>> getGateList() {
+
+        List<GateSummaryResponse> gateList = gateService.getGateList();
+
+        if (gateList.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 조회 성공이지만 게이트웨이가 없음
+        }
+
+        return ResponseEntity.ok(gateList);
+    }
+
     @PutMapping("/{gateNo}")
     public ResponseEntity<Void> updateGate(@PathVariable Long gateNo, @Validated @RequestBody GateRequest gateUpdateRequest) {
 
@@ -54,9 +69,16 @@ public class GateController {
     }
 
     @PatchMapping("/{gateNo}/activate")
-    public ResponseEntity<Void> changeIsActivate(@PathVariable Long gateNo) {
+    public ResponseEntity<Void> changeActivate(@PathVariable Long gateNo) {
 
         gateService.changeActivate(gateNo);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{gateNo}/inactivate")
+    public ResponseEntity<Void> changeInActivate(@PathVariable Long gateNo) {
+        gateService.changeInactivate(gateNo);
 
         return ResponseEntity.ok().build();
     }

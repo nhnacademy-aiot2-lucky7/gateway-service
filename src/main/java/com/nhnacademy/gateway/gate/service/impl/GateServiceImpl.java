@@ -3,6 +3,7 @@ package com.nhnacademy.gateway.gate.service.impl;
 import com.nhnacademy.gateway.gate.domain.Gate;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.dto.GateResponse;
+import com.nhnacademy.gateway.gate.dto.GateSummaryResponse;
 import com.nhnacademy.gateway.gate.exception.ConflictException;
 import com.nhnacademy.gateway.gate.exception.GatewayNotFoundException;
 import com.nhnacademy.gateway.gate.repository.GateRepository;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -72,6 +75,13 @@ public class GateServiceImpl implements GateService {
                 .orElseThrow(GatewayNotFoundException::new);
 
         return gateMapper(gate);
+    }
+
+    @Override
+    public List<GateSummaryResponse> getGateList() {
+        log.debug("모든 게이트웨이 조회 시작!");
+
+        return gateRepository.findGateSummaries();
     }
 
     @Override
