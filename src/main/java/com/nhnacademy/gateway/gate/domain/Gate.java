@@ -89,14 +89,17 @@ public class Gate {
         );
     }
 
-    public void updateGate(String gateName, String protocol, String brokerIp, Integer port, String description) {
+    public void updateGate(String gateName, String protocol, String brokerIp, Integer port, String description, boolean resetStatus) {
         this.gateName = gateName;
         this.protocol = protocol;
         this.brokerIp = brokerIp;
         this.port = port;
         this.description = description;
-        this.isActive = false;
-        this.thresholdStatus = false;
+
+        if (resetStatus) {
+            this.isActive = false;
+            this.thresholdStatus = false;
+        }
     }
 
     public void changeIsActive(boolean isActive) {

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface GateService {
 
-    Long createGate(String encryptedEmail, GateRequest gateRegisterRequest);
+    Long createGate(GateRequest gateRegisterRequest);
 
     GateResponse getGate(Long gateNo);
 

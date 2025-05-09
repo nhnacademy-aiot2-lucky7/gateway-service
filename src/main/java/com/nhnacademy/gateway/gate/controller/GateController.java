@@ -24,7 +24,7 @@ public class GateController {
     @PostMapping("/connect")
     public ResponseEntity<Long> createGate(@RequestHeader("X-User-Id") String encryptedEmail, @Validated @RequestBody GateRequest gateRegisterRequest) {
 
-        Long gateNo = gateService.createGate(encryptedEmail, gateRegisterRequest);
+        Long gateNo = gateService.createGate(gateRegisterRequest);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

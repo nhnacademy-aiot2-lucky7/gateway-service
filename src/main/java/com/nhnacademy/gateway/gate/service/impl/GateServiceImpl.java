@@ -1,5 +1,8 @@
 package com.nhnacademy.gateway.gate.service.impl;
 
+import com.nhnacademy.gateway.event.dto.EventCreateRequest;
+import com.nhnacademy.gateway.event.rabbitMq.EventProducer;
+import com.nhnacademy.gateway.gate.common.UserContextHolder;
 import com.nhnacademy.gateway.gate.domain.Gate;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.dto.GateResponse;
@@ -8,17 +11,14 @@ import com.nhnacademy.gateway.gate.exception.ConflictException;
 import com.nhnacademy.gateway.gate.exception.GatewayNotFoundException;
 import com.nhnacademy.gateway.gate.repository.GateRepository;
 import com.nhnacademy.gateway.gate.service.GateService;
-import com.nhnacademy.gateway.gate.adaptor.UserAdaptor;
-import com.nhnacademy.gateway.gate.dto.UserResponse;
-import com.nhnacademy.gateway.gate.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -27,12 +27,13 @@ import java.util.List;
 public class GateServiceImpl implements GateService {
 
     private final GateRepository gateRepository;
-
-    private final UserAdaptor userAdaptor;
+    private final EventProducer eventProducer;
 
     @Override
-    public Long createGate(@RequestHeader("X-User-Id") String encryptedEmail, GateRequest gateRegisterRequest) {
+    public Long createGate(GateRequest gateRegisterRequest) {
         log.debug("게이트웨이 등록 시작! 게이트웨이 정보: {}", gateRegisterRequest);
+
+        String departmentId = UserContextHolder.getDepartmentId();
 
         boolean isExistAddress = gateRepository.existsByBrokerIpAndPort(
                 gateRegisterRequest.getBrokerIp(),
@@ -40,17 +41,9 @@ public class GateServiceImpl implements GateService {
         );
 
         if (isExistAddress) {
+            sendErrorEvent(null, departmentId, "중복된 게이트웨이 주소");
             throw new ConflictException("이미 사용 중인 주소입니다.");
         }
-
-        ResponseEntity<UserResponse> responseEntity = userAdaptor.getUserInfo(encryptedEmail);
-
-        if (responseEntity == null || responseEntity.getBody() == null) {
-            log.warn("'X-User-Id'에 대한 유저 정보 조회 실패!");
-            throw new UserNotFoundException("유저 정보가 올바르지 않음");
-        }
-
-        String departmentId = responseEntity.getBody().getUserDepartment();
 
         Gate gate = Gate.ofNewGate(
                 gateRegisterRequest.getGateName(),
@@ -62,6 +55,7 @@ public class GateServiceImpl implements GateService {
         );
 
         Gate savedGate = gateRepository.save(gate);
+        sendInfoEvent(savedGate.getGateNo(), departmentId, "새로운 게이트웨이 등록 성공");
 
         return savedGate.getGateNo();
     }
@@ -88,66 +82,88 @@ public class GateServiceImpl implements GateService {
     public void updateGate(Long gateNo, GateRequest gateUpdateRequest) {
         log.debug("게이트웨이 수정 시작! 게이트웨이 아이디 : {}", gateNo);
 
-        Gate gate = gateRepository.findById(gateNo)
-                .orElseThrow(GatewayNotFoundException::new);
+        String departmentId = UserContextHolder.getDepartmentId();
+
+        Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 수정 요청");
+
+        boolean protocolChanged = !Objects.equals(gate.getProtocol(), gateUpdateRequest.getProtocol());
+        boolean ipChanged = !Objects.equals(gate.getBrokerIp(), gateUpdateRequest.getBrokerIp());
+        boolean portChanged = !Objects.equals(gate.getPort(), gateUpdateRequest.getPort());
+
+        // 게이트웨이 중요한 정보인 protocol, ip, port 중에 하나라도 바뀌면 연결부터 게이트웨이 활성화, 임계치 계산 다시 시작해야 함
+        boolean resetNeeded = protocolChanged || ipChanged || portChanged;
 
         gate.updateGate(
                 gateUpdateRequest.getGateName(),
                 gateUpdateRequest.getProtocol(),
                 gateUpdateRequest.getBrokerIp(),
                 gateUpdateRequest.getPort(),
-                gateUpdateRequest.getDescription()
+                gateUpdateRequest.getDescription(),
+                resetNeeded
         );
 
         gateRepository.save(gate);
+
+        log.debug("게이트웨이 수정 완료. 연결 재시도 필요 여부: {}", resetNeeded);
+
+        if (resetNeeded) {
+            sendInfoEvent(gateNo, departmentId, "게이트웨이 정보 수정 성공 - 연결 재시도 필요");
+        } else {
+            sendInfoEvent(gateNo, departmentId, "게이트웨이 정보 수정 성공 - 연결 재시도 불필요");
+        }
     }
 
     @Override
     public void changeActivate(Long gateNo) {
         log.debug("게이트웨이 활성화! 게이트웨이 아이디 : {}", gateNo);
 
-        Gate gate = gateRepository.findById(gateNo)
-                .orElseThrow(GatewayNotFoundException::new);
+        String departmentId = UserContextHolder.getDepartmentId();
+
+        Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 활성화 요청");
 
         gate.changeIsActive(true);
 
         gateRepository.save(gate);
+        sendInfoEvent(gateNo, departmentId, "게이트웨이 활성화");
     }
 
     @Override
     public void changeInactivate(Long gateNo) {
         log.debug("게이트웨이 비활성화! 게이트웨이 아이디 : {}", gateNo);
+        String departmentId = UserContextHolder.getDepartmentId();
 
-        Gate gate = gateRepository.findById(gateNo)
-                .orElseThrow(GatewayNotFoundException::new);
+        Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 비활성화 요청");
 
         gate.changeIsActive(false);
 
         gateRepository.save(gate);
+        sendInfoEvent(gateNo, departmentId, "게이트웨이 비활성화");
     }
 
     @Override
     public void changeThresholdStatus(Long gateNo) {
         log.debug("게이트웨이 임계치 활성화! 게이트웨이 아이디 : {}", gateNo);
+        String departmentId = UserContextHolder.getDepartmentId();
 
-        Gate gate = gateRepository.findById(gateNo)
-                .orElseThrow(GatewayNotFoundException::new);
+        Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 임계치 요청");
 
         gate.changeThresholdStatus(true);
 
         gateRepository.save(gate);
+        sendInfoEvent(gateNo, departmentId, "게이트웨이 임계치 활성화");
     }
 
     @Override
     public void deleteGate(Long gateNo) {
         log.debug("게이트웨이 삭제 시작! 게이트웨이 아이디 : {}", gateNo);
 
-        boolean isExistGate = gateRepository.existsById(gateNo);
-        if (!isExistGate) {
-            throw new GatewayNotFoundException();
-        }
+        String departmentId = UserContextHolder.getDepartmentId();
 
-        gateRepository.deleteById(gateNo);
+        Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 삭제 요청");
+
+        gateRepository.delete(gate);
+
+        sendInfoEvent(gateNo, departmentId, "게이트웨이 삭제 성공");
     }
 
     private GateResponse gateMapper(Gate gate) {
@@ -165,5 +181,35 @@ public class GateServiceImpl implements GateService {
                 gate.getCreatedAt(),
                 gate.getUpdatedAt()
         );
+    }
+
+    private Gate findGateOrThrowWithErrorEvent(Long gateNo, String departmentId, String message) {
+        return gateRepository.findById(gateNo)
+                .orElseThrow(() -> {
+                    sendErrorEvent(gateNo, departmentId, message);
+                    return new GatewayNotFoundException();
+                });
+    }
+
+    private void sendErrorEvent(Long gateNo, String departmentId, String message) {
+        EventCreateRequest event = new EventCreateRequest(
+                "ERROR",
+                message,
+                gateNo == null ? "Null" : gateNo.toString(),
+                departmentId,
+                LocalDateTime.now()
+        );
+        eventProducer.sendEvent(event);
+    }
+
+    private void sendInfoEvent(Long gateNo, String departmentId, String message) {
+        EventCreateRequest event = new EventCreateRequest(
+                "INFO",
+                message,
+                gateNo.toString(),
+                departmentId,
+                LocalDateTime.now()
+        );
+        eventProducer.sendEvent(event);
     }
 }
