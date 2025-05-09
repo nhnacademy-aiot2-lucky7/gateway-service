@@ -2,7 +2,7 @@ package com.nhnacademy.gateway.gate.service.impl;
 
 import com.nhnacademy.gateway.event.dto.EventCreateRequest;
 import com.nhnacademy.gateway.event.rabbitMq.EventProducer;
-import com.nhnacademy.gateway.gate.common.UserContextHolder;
+import com.nhnacademy.gateway.user.common.UserContextHolder;
 import com.nhnacademy.gateway.gate.domain.Gate;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.dto.GateResponse;

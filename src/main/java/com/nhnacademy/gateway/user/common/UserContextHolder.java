@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.gate.common;
+package com.nhnacademy.gateway.user.common;
 
 public class UserContextHolder {
     private static final ThreadLocal<String> departmentId = new ThreadLocal<>();

@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.gate.common;
+package com.nhnacademy.gateway.user.common;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

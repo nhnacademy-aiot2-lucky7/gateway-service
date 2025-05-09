@@ -1,11 +1,12 @@
-package com.nhnacademy.gateway.gate.common;
+package com.nhnacademy.gateway.user.common;
 
-import com.nhnacademy.gateway.gate.adaptor.UserAdaptor;
-import com.nhnacademy.gateway.gate.dto.UserResponse;
+import com.nhnacademy.gateway.user.adaptor.UserAdaptor;
+import com.nhnacademy.gateway.user.dto.UserResponse;
 import com.nhnacademy.gateway.gate.exception.MissingHeaderException;
 import com.nhnacademy.gateway.gate.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -15,7 +16,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
     private final UserAdaptor userAdaptor;
 
-    public UserInterceptor(UserAdaptor userAdaptor) {
+    public UserInterceptor(@Lazy UserAdaptor userAdaptor) {
         this.userAdaptor = userAdaptor;
     }
 

@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.gate.dto;
+package com.nhnacademy.gateway.user.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

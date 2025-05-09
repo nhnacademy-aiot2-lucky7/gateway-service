@@ -1,6 +1,6 @@
-package com.nhnacademy.gateway.gate.adaptor;
+package com.nhnacademy.gateway.user.adaptor;
 
-import com.nhnacademy.gateway.gate.dto.UserResponse;
+import com.nhnacademy.gateway.user.dto.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
