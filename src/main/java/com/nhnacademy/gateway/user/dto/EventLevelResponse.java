@@ -5,22 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @AllArgsConstructor
-public class UserResponse {
+public class EventLevelResponse {
+    private String eventLevelName;
 
-    String userRole;
+    private String eventLevelDetails;
 
-    Long userNo;
-
-    String userName;
-
-    String userEmail;
-
-    String userPhone;
-
-    DepartmentResponse department;
-
-    EventLevelResponse eventLevelResponse;
+    private Integer priority;
 }

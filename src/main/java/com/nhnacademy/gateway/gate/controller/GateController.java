@@ -22,7 +22,7 @@ public class GateController {
     private final GateService gateService;
 
     @PostMapping("/connect")
-    public ResponseEntity<Long> createGate(@RequestHeader("X-User-Id") String encryptedEmail, @Validated @RequestBody GateRequest gateRegisterRequest) {
+    public ResponseEntity<Long> createGate(@Validated @RequestBody GateRequest gateRegisterRequest) {
 
         Long gateNo = gateService.createGate(gateRegisterRequest);
 
