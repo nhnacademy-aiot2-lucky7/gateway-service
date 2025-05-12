@@ -4,10 +4,7 @@ import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,17 +20,18 @@ public class DummyMqttClient {
     private static final long PUBLISH_INTERVAL_MS = 60000;
 
     private static final Map<String, List<String>> SPACE_POSITIONS = Map.of(
-            "office", List.of("position1", "position2", "position3"),
-            "class_a", List.of("position1", "position2"),
-            "class_b", List.of("position1", "position2"),
-            "server_room", List.of("position1", "position2", "position3"),
-            "hive", List.of("position1", "position2", "position3"),
-            "pair_room", List.of("position1", "position2"),
-            "meeting_room", List.of("position1", "position2", "position3"),
-            "undefined", List.of("position1")
+            "office", List.of("위치1", "위치2", "장비1", "장비2"),
+            "class_a", List.of("위치1", "위치2", "장비1", "장비2"),
+            "class_b", List.of("위치1", "위치2", "장비1", "장비2"),
+            "server_room", List.of("위치1", "위치2", "위치3", "장비1", "장비2"),
+            "hive", List.of("위치1", "위치2", "장비1", "장비2"),
+            "pair_room", List.of("위치1", "위치2", "장비1", "장비2"),
+            "meeting_room", List.of("위치1", "위치2", "장비1", "장비2"),
+            "undefined", List.of("위치1")
     );
 
-    private static final List<String> ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
+    private static final List<String> ENV_ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
+    private static final List<String> DEVICE_ELEMENTS = List.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
 
     @PostConstruct
     public void startPublishing() {
@@ -44,23 +42,22 @@ public class DummyMqttClient {
             client.connect(options);
             log.info("MQTT 클라이언트 연결 성공: {}", BROKER);
 
-            // 각 공간에 대해 위치를 순회하면서 데이터를 발행
             for (Map.Entry<String, List<String>> entry : SPACE_POSITIONS.entrySet()) {
                 String place = entry.getKey();
                 List<String> positions = entry.getValue();
+
                 for (String position : positions) {
-                    // 온도와 습도는 동일한 디바이스 ID를 공유
-                    String deviceId = generateDeviceIdForTemperatureAndHumidity(place, position);
-
-                    // 온도 센서와 습도 센서는 동일한 deviceId를 사용
-                    scheduleSensorPublishing(place, deviceId, position, "temperature");
-                    scheduleSensorPublishing(place, deviceId, position, "humidity");
-
-                    // 다른 센서들은 각각 개별적인 deviceId를 사용
-                    for (String element : ELEMENTS) {
-                        if (!element.equals("temperature") && !element.equals("humidity")) {
-                            String individualDeviceId = generateDeviceId();
-                            scheduleSensorPublishing(place, individualDeviceId, position, element);
+                    if (position.startsWith("위치")) {
+                        // ENV 센서
+                        String deviceId = generateDeviceId();
+                        for (String element : ENV_ELEMENTS) {
+                            scheduleSensorPublishing(new TopicInfo(place, "env", deviceId, position, element));
+                        }
+                    } else if (position.startsWith("장비")) {
+                        // DEVICE 센서
+                        String deviceId = generateDeviceId();
+                        for (String element : DEVICE_ELEMENTS) {
+                            scheduleSensorPublishing(new TopicInfo(place, "device", deviceId, position, element));
                         }
                     }
                 }
@@ -71,19 +68,12 @@ public class DummyMqttClient {
         }
     }
 
-    // 온도와 습도 센서에 대해 동일한 deviceId를 생성
-    private String generateDeviceIdForTemperatureAndHumidity(String place, String position) {
-        // UUID를 사용하여 고유한 deviceId를 생성
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-    }
-
     private String generateDeviceId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 
-    private void scheduleSensorPublishing(String place, String deviceId, String position, String element) {
-        TopicInfo topicInfo = new TopicInfo(place, deviceId, position, element);
-        Supplier<String> payloadSupplier = getPayloadSupplierForElement(element);
+    private void scheduleSensorPublishing(TopicInfo topicInfo) {
+        Supplier<String> payloadSupplier = getPayloadSupplierForElement(topicInfo.getElement());
         schedulePublishing(topicInfo, payloadSupplier);
     }
 
@@ -111,15 +101,9 @@ public class DummyMqttClient {
     }
 
     private String buildTopic(TopicInfo topicInfo) {
-
-//        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/d/%s/n/%s/e/%s",
-//                topicInfo.getPlace(),
-//                topicInfo.getDeviceId(),
-//                topicInfo.getPosition(),
-//                topicInfo.getElement());
-
-        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/d/%s/n/%s/e/%s",
+        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
+                topicInfo.getType(),
                 topicInfo.getDeviceId(),
                 topicInfo.getPosition(),
                 topicInfo.getElement());
@@ -131,37 +115,32 @@ public class DummyMqttClient {
             case "humidity" -> this::generateHumidityData;
             case "dust" -> this::generateDustData;
             case "smoke" -> this::generateSmokeData;
-            default -> () -> "{}"; // fallback
+            case "vibration" -> this::generateVibrationData;
+            case "noise" -> this::generateNoiseData;
+            case "pdu_voltage" -> this::generateVoltageData;
+            case "pdu_current" -> this::generateCurrentData;
+            case "pdu_power" -> this::generatePowerData;
+            case "pdu_energy" -> this::generateEnergyData;
+            default -> () -> "{}";
         };
     }
 
-    private String generateTemperatureData() {
-        long time = System.currentTimeMillis();
-        Random random = new Random();
-        double temperature = 15 + random.nextDouble() * 15; // 온도 범위 15~30도
-        return String.format("{\"time\": %d, \"value\": %.2f}", time, temperature);
-    }
+    // 센서 값 생성 메서드들
+    private String generateTemperatureData() { return generateSensorData(15, 30); }
+    private String generateHumidityData() { return generateSensorData(30, 70); }
+    private String generateDustData() { return generateSensorData(10, 80); }
+    private String generateSmokeData() { return generateSensorData(0, 5); }
+    private String generateVibrationData() { return generateSensorData(0, 10); }
+    private String generateNoiseData() { return generateSensorData(30, 90); }
+    private String generateVoltageData() { return generateSensorData(210, 240); }
+    private String generateCurrentData() { return generateSensorData(0, 20); }
+    private String generatePowerData() { return generateSensorData(0, 5000); }
+    private String generateEnergyData() { return generateSensorData(0, 100000); }
 
-    private String generateHumidityData() {
+    private String generateSensorData(double min, double max) {
         long time = System.currentTimeMillis();
         Random random = new Random();
-        double humidity = 30 + random.nextDouble() * 40; // 습도 범위 30~70%
-        return String.format("{\"time\": %d, \"value\": %.2f}", time, humidity);
-    }
-
-    private String generateDustData() {
-        long time = System.currentTimeMillis();
-        Random random = new Random();
-        double pm10 = 10 + random.nextDouble() * 70;
-        double pm25 = 5 + random.nextDouble() * 45;
-        double aqi = (pm10 + pm25) / 2;
-        return String.format("{\"time\": %d, \"value\": %.1f}", time, aqi);
-    }
-
-    private String generateSmokeData() {
-        long time = System.currentTimeMillis();
-        Random random = new Random();
-        double smokeLevel = random.nextDouble() * 5; // 연기 감지 범위 0~5
-        return String.format("{\"time\": %d, \"value\": %.2f}", time, smokeLevel);
+        double value = min + random.nextDouble() * (max - min);
+        return String.format("{\"time\": %d, \"value\": %.2f}", time, value);
     }
 }

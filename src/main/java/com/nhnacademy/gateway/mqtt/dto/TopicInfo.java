@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 @Getter
 public class TopicInfo {
 
-    String place;
+    private String place;
 
-    String deviceId;
+    private String type;
 
-    String position;
+    private String deviceId;
 
-    String element;
+    private String position;
+
+    private String element;
 }

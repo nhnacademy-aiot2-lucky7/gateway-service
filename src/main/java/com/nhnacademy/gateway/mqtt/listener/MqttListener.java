@@ -25,7 +25,6 @@ public class MqttListener {
     private final MqttClient mqttClient;
     private final GateService gateService;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
-
     private long gateId;
 
     @PostConstruct
@@ -36,12 +35,12 @@ public class MqttListener {
         mqttClient.subscribe("dummy_data/#", (topic, message) ->
                 handleMessage(objectMapper, topic, message));
 
-        log.info("Subscribed to topic pattern: dummy_data/#");
+        log.info("토픽 패턴 구독 완료: dummy_data/#");
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
         String payload = new String(message.getPayload());
-        log.debug("Received message - topic: {}, payload: {}", topic, payload);
+        log.debug("메시지 수신 - 토픽: {}, 페이로드: {}", topic, payload);
 
         executor.submit(() -> {
             try {
@@ -51,7 +50,7 @@ public class MqttListener {
 
                 TopicInfo topicInfo = parseTopicParts(topic);
                 if (topicInfo == null) {
-                    log.warn("Invalid topic format: {}", topic);
+                    log.warn("잘못된 토픽 형식: {}", topic);
                     return;
                 }
 
@@ -60,7 +59,7 @@ public class MqttListener {
 
                 publishMessage(newTopic, messageContent);
             } catch (Exception e) {
-                log.error("Failed to process message - topic: {}, error: {}", topic, e.getMessage(), e);
+                log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
             }
         });
     }
@@ -69,15 +68,12 @@ public class MqttListener {
         UserContextHolder.setDepartmentId("master");
 
         GateRequest gateRegisterRequest = new GateRequest(
-                "기존 데이터",
-                "MQTT",
-                "115.94.72.197",
-                1883,
+                "기존 데이터", "MQTT", "115.94.72.197", 1883,
                 "nhnacademy 서버의 센서 수집 데이터"
         );
 
         long id = gateService.createGate(gateRegisterRequest);
-        log.info("Registered gateway with ID: {}", id);
+        log.info("게이트웨이 등록 완료 - ID: {}", id);
         return id;
     }
 
@@ -89,11 +85,15 @@ public class MqttListener {
         String position = getPart(parts, "n");
         String element = getPart(parts, "e");
 
-        if (place == null || deviceId == null || position == null || element == null) {
+        // env, device 여부 판단
+        String type = topic.contains("/env/") ? "env" :
+                topic.contains("/device/") ? "device" : null;
+
+        if (place == null || deviceId == null || position == null || element == null || type == null) {
             return null;
         }
 
-        return new TopicInfo(place, deviceId, position, element);
+        return new TopicInfo(place, type, deviceId, position, element);
     }
 
     private String getPart(String[] parts, String key) {
@@ -107,8 +107,13 @@ public class MqttListener {
 
     private String buildNewTopic(TopicInfo info, long gatewayId) {
         return String.format(
-                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/d/%s/g/%d/n/%s/e/%s",
-                info.getPlace(), info.getDeviceId(), gatewayId, info.getPosition(), info.getElement()
+                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/g/%d/n/%s/e/%s",
+                info.getPlace(),
+                info.getType(),
+                info.getDeviceId(),
+                gatewayId,
+                info.getPosition(),
+                info.getElement()
         );
     }
 
@@ -117,17 +122,15 @@ public class MqttListener {
     }
 
     private void publishMessage(String topic, String payload) throws MqttException {
-        MqttMessage message = new MqttMessage();
-        message.setPayload(payload.getBytes());
-        message.setQos(1); // QOS 설정 필요시 조정
-
+        MqttMessage message = new MqttMessage(payload.getBytes());
+        message.setQos(1); // QOS 설정 필요 시 변경
         mqttClient.publish(topic, message);
-        log.debug("Published message - topic: {}, payload: {}", topic, payload);
+        log.debug("메시지 발행 완료 - 토픽: {}, 페이로드: {}", topic, payload);
     }
 
     @PreDestroy
     public void shutdownExecutor() {
         executor.shutdown();
-        log.info("ExecutorService shut down successfully.");
+        log.info("ExecutorService 정상 종료됨.");
     }
 }
