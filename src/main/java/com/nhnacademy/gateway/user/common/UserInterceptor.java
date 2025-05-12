@@ -34,7 +34,7 @@ public class UserInterceptor implements HandlerInterceptor {
             throw new UserNotFoundException("유저 정보를 찾을 수 없습니다.");
         }
 
-        String departmentId = userInfo.getBody().getUserDepartment();
+        String departmentId = userInfo.getBody().getDepartment().getDepartmentId();
         UserContextHolder.setDepartmentId(departmentId);
 
         return true;

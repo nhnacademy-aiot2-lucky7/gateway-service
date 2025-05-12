@@ -55,7 +55,7 @@ public class GateServiceImpl implements GateService {
         );
 
         Gate savedGate = gateRepository.save(gate);
-        sendInfoEvent(savedGate.getGateNo(), departmentId, "새로운 게이트웨이 등록 성공");
+//        sendInfoEvent(savedGate.getGateNo(), departmentId, "새로운 게이트웨이 등록 성공");
 
         return savedGate.getGateNo();
     }
