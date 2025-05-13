@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.event.rabbitMq;
+package com.nhnacademy.gateway.event.rabbitmq;
 
 import com.nhnacademy.gateway.event.dto.EventCreateRequest;
 import org.junit.jupiter.api.BeforeEach;

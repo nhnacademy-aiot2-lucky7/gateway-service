@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class CommonAdviceTest {
@@ -31,6 +32,10 @@ class CommonAdviceTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).contains("Feign 오류");
         assertThat(response.getBody().getStatusCode()).isEqualTo(503);
+
+        CommonAdvice.ErrorResponse body = response.getBody();
+        assertEquals("Feign 오류: User Service Unavailable", body.getMessage());
+        assertEquals(503, body.getStatusCode());
     }
 
     @Test

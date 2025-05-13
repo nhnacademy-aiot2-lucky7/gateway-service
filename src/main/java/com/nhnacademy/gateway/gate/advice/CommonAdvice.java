@@ -17,7 +17,6 @@ import org.springframework.validation.FieldError;
 @RestControllerAdvice
 public class CommonAdvice {
 
-
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<CommonAdvice.ErrorResponse> handleFeignException(FeignException e) {
         log.warn("FeignException 발생: status={}, message={}", e.status(), e.getMessage());
@@ -62,6 +61,7 @@ public class CommonAdvice {
 
     @Getter
     @AllArgsConstructor
+    @SuppressWarnings("unused")
     public static class ErrorResponse {
         private String message;
         private int statusCode;

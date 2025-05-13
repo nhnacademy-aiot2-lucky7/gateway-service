@@ -8,6 +8,7 @@ import lombok.Getter;
  * 주로 HTTP 오류 응답을 처리할 때 사용되며, 상태 코드와 예외 메시지를 함께 전달할 수 있습니다.
  */
 @Getter
+@SuppressWarnings("unused")
 public class CommonHttpException extends RuntimeException {
 
     /**

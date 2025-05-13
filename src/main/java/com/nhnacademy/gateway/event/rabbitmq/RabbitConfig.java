@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.event.rabbitMq;
+package com.nhnacademy.gateway.event.rabbitmq;
 
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
