@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MqttConfig {
 
-    private static final String BROKER = "tcp://localhost:10240";
+    private static final String BROKER = "tcp://172.19.0.3:1883"; // 로컬 환경 테스트 용도
+
+//    private static final String BROKER = "tcp://localhost:10240";
     private static final String CLIENT_ID = "spring-mqtt-client";
 
     @Bean
