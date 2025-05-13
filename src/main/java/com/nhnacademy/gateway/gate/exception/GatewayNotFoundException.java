@@ -1,7 +1,5 @@
 package com.nhnacademy.gateway.gate.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class GatewayNotFoundException extends CommonHttpException {
 
     private static final int HTTP_STATUS_CODE = 404;
