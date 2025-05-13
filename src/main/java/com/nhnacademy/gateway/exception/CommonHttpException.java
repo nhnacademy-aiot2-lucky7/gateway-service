@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.gate.exception;
+package com.nhnacademy.gateway.exception;
 
 import lombok.Getter;
 

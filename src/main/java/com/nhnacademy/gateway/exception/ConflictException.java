@@ -1,4 +1,4 @@
-package com.nhnacademy.gateway.gate.exception;
+package com.nhnacademy.gateway.exception;
 
 /**
  * 리소스 간의 충돌이 발생했을 때 사용되는 예외 클래스입니다.

@@ -1,7 +1,7 @@
 package com.nhnacademy.gateway.user.common;
 
-import com.nhnacademy.gateway.gate.exception.MissingHeaderException;
-import com.nhnacademy.gateway.gate.exception.UserNotFoundException;
+import com.nhnacademy.gateway.exception.MissingHeaderException;
+import com.nhnacademy.gateway.exception.UserNotFoundException;
 import com.nhnacademy.gateway.user.adaptor.UserAdaptor;
 import com.nhnacademy.gateway.user.dto.DepartmentResponse;
 import com.nhnacademy.gateway.user.dto.UserResponse;

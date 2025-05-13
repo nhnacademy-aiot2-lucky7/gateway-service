@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.mqtt.client;
 
+import com.nhnacademy.gateway.exception.MqttConnectionException;
 import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +66,8 @@ public class DummyMqttClient {
 
         } catch (MqttException e) {
             log.error("MQTT 연결 실패: {}", e.getMessage(), e);
+
+            throw new MqttConnectionException("Mqtt 연결 실패");
         }
     }
 
@@ -94,6 +97,8 @@ public class DummyMqttClient {
                     log.info("메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
                 } catch (MqttException e) {
                     log.error("메시지 발행 실패 - 토픽: {}, 오류: {}", topic, e.getMessage(), e);
+
+                    throw new MqttConnectionException("Mqtt 메시지 발행 실패");
                 }
             }
         }, 0, PUBLISH_INTERVAL_MS);
@@ -102,14 +107,7 @@ public class DummyMqttClient {
 
     private String buildTopic(TopicInfo topicInfo) {
 
-//        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
-//                topicInfo.getPlace(),
-//                topicInfo.getType(),
-//                topicInfo.getDeviceId(),
-//                topicInfo.getPosition(),
-//                topicInfo.getElement());
-
-        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
+        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
                 topicInfo.getType(),
                 topicInfo.getDeviceId(),

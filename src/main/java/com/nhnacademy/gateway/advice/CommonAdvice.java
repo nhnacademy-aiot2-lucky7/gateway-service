@@ -1,6 +1,7 @@
-package com.nhnacademy.gateway.gate.advice;
+package com.nhnacademy.gateway.advice;
 
-import com.nhnacademy.gateway.gate.exception.CommonHttpException;
+import com.nhnacademy.gateway.exception.CommonHttpException;
+import com.nhnacademy.gateway.exception.MqttConnectionException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,13 @@ public class CommonAdvice {
 
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(errorMessage, 400));
+    }
+
+    @ExceptionHandler(MqttConnectionException.class)
+    public ResponseEntity<ErrorResponse> handleMqttConnectionException(MqttConnectionException e) {
+        log.error("MQTT 예외 발생: {}", e.getMessage(), e);
+        return ResponseEntity.status(e.getStatusCode())
+                .body(new ErrorResponse(e.getMessage(), e.getStatusCode()));
     }
 
     @ExceptionHandler(CommonHttpException.class)

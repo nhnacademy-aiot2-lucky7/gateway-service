@@ -1,6 +1,7 @@
 package com.nhnacademy.gateway.gate.advice;
 
-import com.nhnacademy.gateway.gate.exception.CommonHttpException;
+import com.nhnacademy.gateway.advice.CommonAdvice;
+import com.nhnacademy.gateway.exception.CommonHttpException;
 import feign.FeignException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
