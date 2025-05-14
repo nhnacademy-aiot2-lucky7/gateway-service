@@ -128,28 +128,60 @@ class GateServiceImplTest {
         assertThat(list.get(0).getGateName()).isEqualTo("G1");
     }
 
-
     @Test
-    void testUpdateGate_success() {
+    void testUpdateGate_changeAllFields_success() {
         Long id = 1L;
-        Gate gate = Gate.ofNewGate("G1","MQTT","127.0.0.1",1883,DEPT,"desc");
+        Gate gate = Gate.ofNewGate("G1", "MQTT", "127.0.0.1", 1883, DEPT, "desc");
+
         try {
             var f = Gate.class.getDeclaredField("gateNo");
             f.setAccessible(true);
             f.set(gate, id);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            Assertions.fail("Reflection failed to set gateNo: " + e.getMessage());
+            Assertions.fail("Reflection failed: " + e.getMessage());
         }
 
         when(gateRepository.findById(id)).thenReturn(Optional.of(gate));
-        GateRequest req = new GateRequest("G2","MQTT","192.168.0.1",1884,"upd");
+        GateRequest req = new GateRequest("G2", "MQTT", "192.168.0.1", 1884, "updated description");
 
-        gateService.updateGate(id, req);
+        boolean result = gateService.updateGate(id, req);
 
-        assertThat(gate.getDescription()).isEqualTo("upd");
-        verify(eventProducer, atLeastOnce()).sendEvent(any(EventCreateRequest.class));
+        assertThat(result).isTrue(); // 중요한 필드 바뀜 → resetNeeded = true
+
+        assertThat(gate.getGateName()).isEqualTo("G2");
+        assertThat(gate.getBrokerIp()).isEqualTo("192.168.0.1");
+        assertThat(gate.getPort()).isEqualTo(1884);
+        assertThat(gate.getDescription()).isEqualTo("updated description");
+
         verify(gateRepository).save(gate);
+        verify(eventProducer).sendEvent(any(EventCreateRequest.class));
     }
+
+    @Test
+    void testUpdateGate_noChangeFields_success() {
+        Long id = 1L;
+        Gate gate = Gate.ofNewGate("G1", "MQTT", "127.0.0.1", 1883, DEPT, "desc");
+
+        try {
+            var f = Gate.class.getDeclaredField("gateNo");
+            f.setAccessible(true);
+            f.set(gate, id);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            Assertions.fail("Reflection failed: " + e.getMessage());
+        }
+
+        when(gateRepository.findById(id)).thenReturn(Optional.of(gate));
+        GateRequest req = new GateRequest("G1", "MQTT", "127.0.0.1", 1883, "desc");
+
+        boolean result = gateService.updateGate(id, req);
+
+        assertThat(result).isFalse(); // 중요한 필드 안 바뀜 → resetNeeded = false
+
+        verify(gateRepository).save(gate); // save는 항상 호출됨
+        verify(eventProducer).sendEvent(any(EventCreateRequest.class)); // 이벤트도 항상 전송됨
+    }
+
+
 
     @Test
     void testUpdateGate_notFound() {

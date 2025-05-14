@@ -16,8 +16,10 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DummyMqttClient {
 
-    private static final String BROKER = "tcp://172.19.0.3:1883";
+    private static final String BROKER = "tcp://172.19.0.2:1883";
+
     private MqttClient client;
+
     private static final long PUBLISH_INTERVAL_MS = 60000;
 
     private static final Map<String, List<String>> SPACE_POSITIONS = Map.of(
@@ -105,7 +107,7 @@ public class DummyMqttClient {
         log.debug("주기적 발행 설정 완료 - 토픽: {}, 간격: {}ms", topic, PUBLISH_INTERVAL_MS);
     }
 
-    private String buildTopic(TopicInfo topicInfo) {
+    String buildTopic(TopicInfo topicInfo) {
 
         return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
@@ -115,7 +117,7 @@ public class DummyMqttClient {
                 topicInfo.getElement());
     }
 
-    private Supplier<String> getPayloadSupplierForElement(String element) {
+    Supplier<String> getPayloadSupplierForElement(String element) {
         return switch (element) {
             case "temperature" -> this::generateTemperatureData;
             case "humidity" -> this::generateHumidityData;
@@ -143,7 +145,7 @@ public class DummyMqttClient {
     private String generatePowerData() { return generateSensorData(0, 5000); }
     private String generateEnergyData() { return generateSensorData(0, 100000); }
 
-    private String generateSensorData(double min, double max) {
+    String generateSensorData(double min, double max) {
         long time = System.currentTimeMillis();
         Random random = new Random();
         double value = min + random.nextDouble() * (max - min);

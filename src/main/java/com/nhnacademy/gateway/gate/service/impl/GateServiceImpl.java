@@ -55,7 +55,7 @@ public class GateServiceImpl implements GateService {
         );
 
         Gate savedGate = gateRepository.save(gate);
-//        sendInfoEvent(savedGate.getGateNo(), departmentId, "새로운 게이트웨이 등록 성공");
+        sendInfoEvent(savedGate.getGateNo(), departmentId, "새로운 게이트웨이 등록 성공");
 
         return savedGate.getGateNo();
     }
@@ -71,6 +71,7 @@ public class GateServiceImpl implements GateService {
         return gateMapper(gate);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<GateSummaryResponse> getGateList() {
         log.debug("모든 게이트웨이 조회 시작!");
@@ -79,7 +80,7 @@ public class GateServiceImpl implements GateService {
     }
 
     @Override
-    public void updateGate(Long gateNo, GateRequest gateUpdateRequest) {
+    public boolean updateGate(Long gateNo, GateRequest gateUpdateRequest) {
         log.debug("게이트웨이 수정 시작! 게이트웨이 아이디 : {}", gateNo);
 
         String departmentId = UserContextHolder.getDepartmentId();
@@ -111,6 +112,8 @@ public class GateServiceImpl implements GateService {
         } else {
             sendInfoEvent(gateNo, departmentId, "게이트웨이 정보 수정 성공 - 연결 재시도 불필요");
         }
+
+        return resetNeeded;
     }
 
     @Override

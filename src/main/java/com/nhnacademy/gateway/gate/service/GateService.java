@@ -14,7 +14,7 @@ public interface GateService {
 
     List<GateSummaryResponse> getGateList();
 
-    void updateGate(Long gateNo, GateRequest gateUpdateRequest);
+    boolean updateGate(Long gateNo, GateRequest gateUpdateRequest);
 
     void changeActivate(Long gateNo);
 
