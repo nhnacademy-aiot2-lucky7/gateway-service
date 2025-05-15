@@ -1,6 +1,7 @@
 package com.nhnacademy.gateway.mqtt.receivedata.receiver.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.gateway.exception.MqttConnectionException;
 import com.nhnacademy.gateway.mqtt.receivedata.dto.DataRequest;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.GatewayReceiver;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,7 @@ public class MqttDataReceiver implements GatewayReceiver {
 
         } catch (MqttException e) {
             log.error("[MQTT 에러] gatewayId={} 브로커 연결 실패: {}", gatewayId, e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new MqttConnectionException();
         }
     }
 }

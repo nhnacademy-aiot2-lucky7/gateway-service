@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.event.rabbitmq;
 
+import com.nhnacademy.gateway.exception.RabbitConfigurationException;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,14 +23,20 @@ public class RabbitConfig {
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
                                          Jackson2JsonMessageConverter messageConverter) {
+        if (connectionFactory == null) {
+            throw new RabbitConfigurationException("RabbitMQ ConnectionFactory 설정이 누락되었습니다.");
+        }
+
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
         return template;
     }
 
-    // (선택) Exchange 선언
     @Bean
     public DirectExchange eventExchange() {
+        if (eventExchange == null || eventExchange.isBlank()) {
+            throw new RabbitConfigurationException("event.exchange 설정이 비어 있습니다.");
+        }
         return new DirectExchange(eventExchange);
     }
 }

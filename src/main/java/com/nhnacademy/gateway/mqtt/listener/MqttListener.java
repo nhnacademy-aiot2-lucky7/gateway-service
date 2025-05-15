@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
@@ -27,7 +29,7 @@ public class MqttListener {
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private long gateId;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void subscribe() throws MqttException {
         this.gateId = registerGateway();
         ObjectMapper objectMapper = new ObjectMapper();

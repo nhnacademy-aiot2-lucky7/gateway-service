@@ -1,13 +1,12 @@
 package com.nhnacademy.gateway.mqtt.client;
 
+import com.nhnacademy.gateway.exception.MqttConnectionException;
 import com.nhnacademy.gateway.mqtt.receivedata.dto.DataRequest;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.impl.CoapDataReceiver;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.impl.HttpDataReceiver;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.impl.MqttDataReceiver;
 import org.eclipse.paho.client.mqttv3.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,7 +24,6 @@ class GatewayConnectorTest {
     MqttDataReceiver mqttReceiver;
     HttpDataReceiver httpReceiver;
     CoapDataReceiver coapReceiver;
-
     GatewayConnector connector;
 
     @BeforeEach
@@ -33,32 +31,26 @@ class GatewayConnectorTest {
         mqttReceiver = mock(MqttDataReceiver.class);
         httpReceiver = mock(HttpDataReceiver.class);
         coapReceiver = mock(CoapDataReceiver.class);
-
         connector = new GatewayConnector(mqttReceiver, httpReceiver, coapReceiver);
     }
 
     @AfterEach
     void tearDown() {
-        // 스케줄러가 남아 있으면 종료
         connector.shutdown("gw1");
     }
 
     @Test
     void startGateway_invokesCorrectReceiver_andSchedulesPublish() {
-        // MQTT
         connector.startGateway("tcp://test:1883", "gw1", "MQTT");
         verify(mqttReceiver).start("tcp://test:1883", "gw1", "gw1/data");
 
-        // HTTP
         connector.startGateway("url", "gw2", "HTTP");
         verify(httpReceiver).start("url", "gw2", "gw2/data");
 
-        // COAP
         connector.startGateway("url", "gw3", "COAP");
         verify(coapReceiver).start("url", "gw3", "gw3/data");
 
-        // 잘못된 프로토콜인 경우 아무 호출도 안 함
-        connector.startGateway("u", "gwX", "UNKNOWN");
+        connector.startGateway("url", "gwX", "UNKNOWN");
         verifyNoMoreInteractions(mqttReceiver, httpReceiver, coapReceiver);
     }
 
@@ -67,23 +59,21 @@ class GatewayConnectorTest {
         DataRequest req = new DataRequest("t1", 1L, 2.2);
         connector.receiveGatewayData("t1", req);
 
-        // 내부 큐에 들어갔는지 반사적으로 publishToHub()로 꺼내보도록
-        // 빈 큐면 publishToHub 바로 리턴하므로, 먼저 큐에 넣고 직접 publishToHub 호출
-        // 리플렉션 활용해 private 메서드 호출
         var m = GatewayConnector.class.getDeclaredMethod("publishToHub", String.class);
         m.setAccessible(true);
 
-        // MockedConstruction 으로 허브 클라이언트 모의
         try (MockedConstruction<MqttClient> mockClient = mockConstruction(MqttClient.class,
                 (mc, ctx) -> {
-                    // connect & publish 만 모의
+                    try {
+                        doNothing().when(mc).connect(any());
+                        doNothing().when(mc).publish(anyString(), any(MqttMessage.class));
+                    } catch (MqttException e) {
+                        throw new RuntimeException(e);
+                    }
                 })) {
-
-            // publishToHub 실행
             m.invoke(connector, "gw1");
 
             MqttClient hubClient = mockClient.constructed().get(0);
-            // publish 호출 검증
             verify(hubClient).publish(eq("project-data/gw1"), any(MqttMessage.class));
         }
     }
@@ -93,32 +83,105 @@ class GatewayConnectorTest {
         var m = GatewayConnector.class.getDeclaredMethod("publishToHub", String.class);
         m.setAccessible(true);
 
-        // MockedConstruction 으로 허브 클라이언트 생성 감지
         try (MockedConstruction<MqttClient> mockClient = mockConstruction(MqttClient.class)) {
             m.invoke(connector, "gw1");
-            // publish 자체가 절대 호출되지 않아야 함
             assertThat(mockClient.constructed()).isEmpty();
         }
     }
 
     @Test
-    void shutdown_cleansUpSchedulerAndClient() throws Exception {
-        // 1) 준비: startGateway 로 스케줄러 등록
-        connector.startGateway("url", "gw1", "MQTT");
-        // 스케줄러가 map에 존재해야 함
-        // 2) publishToHub 스케줄이 실행되면 안 되도록 바로 shutdown
+    void publishToHub_mqttConnectionFails_shouldThrowCustomException() throws Exception {
+        var m = GatewayConnector.class.getDeclaredMethod("publishToHub", String.class);
+        m.setAccessible(true);
+
+        // 강제로 queue에 데이터 하나 추가
+        connector.receiveGatewayData("t1", new DataRequest("t1", 1L, 2.2));
+
+        try (MockedConstruction<MqttClient> ignored = mockConstruction(MqttClient.class,
+                (mc, ctx) -> {
+                    try {
+                        doThrow(new MqttException(1)).when(mc).connect(any());
+                    } catch (MqttException e) {
+                        throw new RuntimeException(e);
+                    }
+                })) {
+            assertThatThrownBy(() -> m.invoke(connector, "gw1"))
+                    .hasCauseInstanceOf(MqttConnectionException.class);
+        }
+    }
+
+    @Test
+    void publishToHub_publishFails_shouldLogError() throws Exception {
+        var m = GatewayConnector.class.getDeclaredMethod("publishToHub", String.class);
+        m.setAccessible(true);
+
+        connector.receiveGatewayData("t1", new DataRequest("t1", 1L, 2.2));
+
+        try (MockedConstruction<MqttClient> mockClient = mockConstruction(MqttClient.class,
+                (mc, ctx) -> {
+                    try {
+                        doNothing().when(mc).connect(any());
+                        doThrow(new MqttException(2)).when(mc).publish(anyString(), any(MqttMessage.class));
+                    } catch (MqttException e) {
+                        throw new RuntimeException(e);
+                    }
+                })) {
+            m.invoke(connector, "gw1");
+
+            MqttClient hubClient = mockClient.constructed().get(0);
+            verify(hubClient).publish(anyString(), any());
+        }
+    }
+
+    @Test
+    void shutdown_disconnectFails_shouldLogWarning() throws Exception {
+        MqttClient mockClient = mock(MqttClient.class);
+        when(mockClient.isConnected()).thenReturn(true);
+
+        // lenient로 불필요한 스텁 경고 방지
+        lenient().doThrow(new MqttException(0)).when(mockClient).disconnect();
+        lenient().doThrow(new MqttException(0)).when(mockClient).close();
+
+        var clientMapField = GatewayConnector.class.getDeclaredField("clientMap");
+        clientMapField.setAccessible(true);
+//        @SuppressWarnings("unchecked")
+        Map<String, MqttClient> clientMap = (Map<String, MqttClient>) clientMapField.get(connector);
+        clientMap.put("gw1", mockClient);
+
+        var schedulerMapField = GatewayConnector.class.getDeclaredField("schedulerMap");
+        schedulerMapField.setAccessible(true);
+//        @SuppressWarnings("unchecked")
+        Map<String, ScheduledExecutorService> schedulerMap = (Map<String, ScheduledExecutorService>) schedulerMapField.get(connector);
+        schedulerMap.put("gw1", mock(ScheduledExecutorService.class));
+
         connector.shutdown("gw1");
 
-        // 스케줄러가 종료되었는지 확인 (반사로 들여다보기)
+        assertThat(clientMap).doesNotContainKey("gw1");
+        assertThat(schedulerMap).doesNotContainKey("gw1");
+    }
+
+    @Test
+    void shutdown_cleansUpSchedulerAndClient() throws Exception {
+        connector.startGateway("url", "gw1", "MQTT");
+        connector.shutdown("gw1");
+
         var schedMapF = GatewayConnector.class.getDeclaredField("schedulerMap");
         schedMapF.setAccessible(true);
         var schedMap = (Map<String, ScheduledExecutorService>) schedMapF.get(connector);
         assertThat(schedMap).doesNotContainKey("gw1");
 
-        // 클라이언트 map에도 없애는 로직 테스트
         var clientMapF = GatewayConnector.class.getDeclaredField("clientMap");
         clientMapF.setAccessible(true);
         var clientMap = (Map<String, MqttClient>) clientMapF.get(connector);
         assertThat(clientMap).doesNotContainKey("gw1");
+    }
+
+    @Test
+    void testStartGatewayWithHttp() {
+        HttpDataReceiver mockHttpReceiver = mock(HttpDataReceiver.class);
+        connector = new GatewayConnector(null, mockHttpReceiver, null);
+        connector.startGateway("http://example.com", "gateway123", "HTTP");
+
+        verify(mockHttpReceiver, times(1)).start(anyString(), anyString(), anyString());
     }
 }

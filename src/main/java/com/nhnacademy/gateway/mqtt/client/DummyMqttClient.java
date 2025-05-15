@@ -6,6 +6,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -16,7 +18,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DummyMqttClient {
 
-    private static final String BROKER = "tcp://172.19.0.2:1883";
+    private static final String BROKER = "tcp://localhost:10240";
 
     private MqttClient client;
 
@@ -36,7 +38,7 @@ public class DummyMqttClient {
     private static final List<String> ENV_ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
     private static final List<String> DEVICE_ELEMENTS = List.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void startPublishing() {
         try {
             client = new MqttClient(BROKER, MqttClient.generateClientId());
@@ -109,7 +111,14 @@ public class DummyMqttClient {
 
     String buildTopic(TopicInfo topicInfo) {
 
-        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
+//        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
+//                topicInfo.getPlace(),
+//                topicInfo.getType(),
+//                topicInfo.getDeviceId(),
+//                topicInfo.getPosition(),
+//                topicInfo.getElement());
+
+        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
                 topicInfo.getType(),
                 topicInfo.getDeviceId(),

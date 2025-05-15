@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.mqtt.client;
 
+import com.nhnacademy.gateway.exception.MqttConnectionException;
 import com.nhnacademy.gateway.mqtt.receivedata.dto.DataRequest;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.impl.CoapDataReceiver;
 import com.nhnacademy.gateway.mqtt.receivedata.receiver.impl.HttpDataReceiver;
@@ -90,7 +91,7 @@ public class GatewayConnector {
                     return client;
                 } catch (MqttException e) {
                     log.error("허브 브로커 연결 실패: {}", e.getMessage(), e);
-                    throw new RuntimeException(e);
+                    throw new MqttConnectionException();
                 }
             });
 

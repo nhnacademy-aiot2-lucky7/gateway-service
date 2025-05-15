@@ -32,7 +32,7 @@ class DummyMqttClientIntegrationTest {
 
     @BeforeAll
     void setupSubscriber() throws MqttException {
-        testSubscriber = new MqttClient("tcp://172.19.0.2:1883", MqttClient.generateClientId());
+        testSubscriber = new MqttClient("tcp://172.19.0.3:1883", MqttClient.generateClientId());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
         testSubscriber.connect(options);

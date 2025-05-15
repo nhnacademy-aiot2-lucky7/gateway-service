@@ -32,7 +32,7 @@ class CoapDataReceiverTest {
 
     @BeforeEach
     void setUp() {
-        receiver = new CoapDataReceiver(gatewayConnector);
+        receiver = new CoapDataReceiver();
     }
 
     @Test
@@ -54,7 +54,7 @@ class CoapDataReceiverTest {
         // 1) DataResource 클래스 리플렉션으로 가져오기
         Class<?> dataResClazz = null;
         for (Class<?> c : CoapDataReceiver.class.getDeclaredClasses()) {
-            if (c.getSimpleName().equals("DataResource")) {
+            if (c == CoapDataReceiver.DataResource.class ) {
                 dataResClazz = c;
                 break;
             }
@@ -94,7 +94,7 @@ class CoapDataReceiverTest {
         // DataResource 리플렉션 준비
         Class<?> dataResClazz = null;
         for (Class<?> c : CoapDataReceiver.class.getDeclaredClasses()) {
-            if (c.getSimpleName().equals("DataResource")) {
+            if (c == CoapDataReceiver.DataResource.class) {
                 dataResClazz = c;
                 break;
             }
