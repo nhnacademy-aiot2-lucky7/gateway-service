@@ -2,7 +2,6 @@ package com.nhnacademy.gateway.mqtt.client;
 
 import com.nhnacademy.gateway.exception.MqttConnectionException;
 import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
@@ -18,7 +17,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DummyMqttClient {
 
-    private static final String BROKER = "tcp://localhost:10240";
+    private static final String BROKER = "tcp://172.19.0.3:1883";
 
     private MqttClient client;
 
@@ -98,7 +97,7 @@ public class DummyMqttClient {
                     MqttMessage message = new MqttMessage(payload.getBytes());
                     message.setQos(1);
                     client.publish(topic, message);
-                    log.info("메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
+                    log.debug("메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
                 } catch (MqttException e) {
                     log.error("메시지 발행 실패 - 토픽: {}, 오류: {}", topic, e.getMessage(), e);
 
@@ -111,14 +110,7 @@ public class DummyMqttClient {
 
     String buildTopic(TopicInfo topicInfo) {
 
-//        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
-//                topicInfo.getPlace(),
-//                topicInfo.getType(),
-//                topicInfo.getDeviceId(),
-//                topicInfo.getPosition(),
-//                topicInfo.getElement());
-
-        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
+        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
                 topicInfo.getType(),
                 topicInfo.getDeviceId(),

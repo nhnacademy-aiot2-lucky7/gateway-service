@@ -31,8 +31,13 @@ class CoapDataReceiverTest {
     final String topic     = "topic1";
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception{
         receiver = new CoapDataReceiver();
+
+        // 리플렉션으로 gatewayConnector 필드에 @Mock 객체 주입
+        Field connectorField = CoapDataReceiver.class.getDeclaredField("gatewayConnector");
+        connectorField.setAccessible(true);
+        connectorField.set(receiver, gatewayConnector);
     }
 
     @Test
@@ -54,7 +59,7 @@ class CoapDataReceiverTest {
         // 1) DataResource 클래스 리플렉션으로 가져오기
         Class<?> dataResClazz = null;
         for (Class<?> c : CoapDataReceiver.class.getDeclaredClasses()) {
-            if (c == CoapDataReceiver.DataResource.class ) {
+            if (c == CoapDataReceiver.DataResource.class) {
                 dataResClazz = c;
                 break;
             }
@@ -88,6 +93,7 @@ class CoapDataReceiverTest {
         // 7) OK 응답 검증
         verify(exchange).respond(CoAP.ResponseCode.CONTENT, "OK");
     }
+
 
     @Test
     void handlePOST_invalidPayload_respondsBadRequestAndNoServiceCall() throws Exception {
