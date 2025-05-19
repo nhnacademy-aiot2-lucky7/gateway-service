@@ -7,8 +7,8 @@ import com.nhnacademy.gateway.gate.domain.Gate;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.dto.GateResponse;
 import com.nhnacademy.gateway.gate.dto.GateSummaryResponse;
-import com.nhnacademy.gateway.gate.exception.ConflictException;
-import com.nhnacademy.gateway.gate.exception.GatewayNotFoundException;
+import com.nhnacademy.gateway.exception.ConflictException;
+import com.nhnacademy.gateway.exception.GatewayNotFoundException;
 import com.nhnacademy.gateway.gate.repository.GateRepository;
 import com.nhnacademy.gateway.gate.service.GateService;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +71,7 @@ public class GateServiceImpl implements GateService {
         return gateMapper(gate);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<GateSummaryResponse> getGateList() {
         log.debug("모든 게이트웨이 조회 시작!");
@@ -79,7 +80,7 @@ public class GateServiceImpl implements GateService {
     }
 
     @Override
-    public void updateGate(Long gateNo, GateRequest gateUpdateRequest) {
+    public boolean updateGate(Long gateNo, GateRequest gateUpdateRequest) {
         log.debug("게이트웨이 수정 시작! 게이트웨이 아이디 : {}", gateNo);
 
         String departmentId = UserContextHolder.getDepartmentId();
@@ -111,6 +112,8 @@ public class GateServiceImpl implements GateService {
         } else {
             sendInfoEvent(gateNo, departmentId, "게이트웨이 정보 수정 성공 - 연결 재시도 불필요");
         }
+
+        return resetNeeded;
     }
 
     @Override
