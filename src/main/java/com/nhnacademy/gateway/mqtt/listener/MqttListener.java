@@ -34,10 +34,10 @@ public class MqttListener {
         this.gateId = registerGateway();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        mqttClient.subscribe("dummy_data/#", (topic, message) ->
+        mqttClient.subscribe("data/#", (topic, message) ->
                 handleMessage(objectMapper, topic, message));
 
-        log.info("토픽 패턴 구독 완료: dummy_data/#");
+        log.info("토픽 패턴 구독 완료: data/#");
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {

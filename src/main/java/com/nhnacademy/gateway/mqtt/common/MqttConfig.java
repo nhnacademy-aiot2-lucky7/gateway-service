@@ -6,6 +6,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +14,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MqttConfig {
 
-    private static final String BROKER = "tcp://localhost:10240";
+    @Value("${mqtt.broker.url}")
+    private String brokerUrl;
 
     private static final String CLIENT_ID = "spring-mqtt-client";
 
@@ -21,7 +23,7 @@ public class MqttConfig {
 
     @Bean
     public MqttClient mqttClient() throws MqttException {
-        client = new MqttClient(BROKER, CLIENT_ID, new MemoryPersistence());
+        client = new MqttClient(brokerUrl, CLIENT_ID, new MemoryPersistence());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
         options.setCleanSession(true);
