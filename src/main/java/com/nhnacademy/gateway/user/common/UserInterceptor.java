@@ -2,8 +2,8 @@ package com.nhnacademy.gateway.user.common;
 
 import com.nhnacademy.gateway.user.adaptor.UserAdaptor;
 import com.nhnacademy.gateway.user.dto.UserResponse;
-import com.nhnacademy.gateway.gate.exception.MissingHeaderException;
-import com.nhnacademy.gateway.gate.exception.UserNotFoundException;
+import com.nhnacademy.gateway.exception.MissingHeaderException;
+import com.nhnacademy.gateway.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Lazy;
@@ -34,7 +34,7 @@ public class UserInterceptor implements HandlerInterceptor {
             throw new UserNotFoundException("유저 정보를 찾을 수 없습니다.");
         }
 
-        String departmentId = userInfo.getBody().getUserDepartment();
+        String departmentId = userInfo.getBody().getDepartment().getDepartmentId();
         UserContextHolder.setDepartmentId(departmentId);
 
         return true;

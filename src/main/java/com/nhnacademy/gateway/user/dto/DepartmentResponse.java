@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("unused")
 public class DepartmentResponse {
     private String departmentId;
 

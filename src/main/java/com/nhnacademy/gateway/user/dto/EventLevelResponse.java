@@ -6,8 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
 @AllArgsConstructor
+@Getter
+@SuppressWarnings("unused")
 public class EventLevelResponse {
     private String eventLevelName;
 
