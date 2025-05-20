@@ -27,6 +27,7 @@ public class MqttConfig {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
         options.setCleanSession(false);
+        options.setMaxInflight(100);
 
         int attempt = 0;
         while (attempt < 5) {
