@@ -125,7 +125,7 @@ public class MqttListener {
 
     private void publishMessage(String topic, String payload) throws MqttException {
         MqttMessage message = new MqttMessage(payload.getBytes());
-        message.setQos(0);
+        message.setQos(1);
         mqttClient.publish(topic, message);
         log.debug("메시지 발행 완료 - 토픽: {}, 페이로드: {}", topic, payload);
     }
