@@ -19,6 +19,7 @@
 .idea/**/contentModel.xml
 
 src/main/resources/application-dev.properties
+logs/**
 
 
 # Sensitive or high-churn files
