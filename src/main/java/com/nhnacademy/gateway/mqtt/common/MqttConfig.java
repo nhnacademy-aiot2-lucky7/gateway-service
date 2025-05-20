@@ -26,7 +26,7 @@ public class MqttConfig {
         client = new MqttClient(brokerUrl, CLIENT_ID, new MemoryPersistence());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
-        options.setCleanSession(true);
+        options.setCleanSession(false);
 
         int attempt = 0;
         while (attempt < 5) {

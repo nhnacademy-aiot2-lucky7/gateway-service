@@ -17,9 +17,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DummyMqttClient {
 
-    private static final String BROKER = "tcp://172.19.0.3:1883";
-
-    private MqttClient client;
+    private final MqttClient client;
 
     private static final long PUBLISH_INTERVAL_MS = 60000;
 
@@ -40,11 +38,10 @@ public class DummyMqttClient {
     @EventListener(ApplicationReadyEvent.class)
     public void startPublishing() {
         try {
-            client = new MqttClient(BROKER, MqttClient.generateClientId());
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setCleanSession(true);
-            client.connect(options);
-            log.info("MQTT 클라이언트 연결 성공: {}", BROKER);
+            if (!client.isConnected()) {
+                client.reconnect();
+            }
+            log.info("Dummy MQTT 클라이언트 실행, 브로커: {}", client.getServerURI());
 
             for (Map.Entry<String, List<String>> entry : SPACE_POSITIONS.entrySet()) {
                 String place = entry.getKey();
