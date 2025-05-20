@@ -21,27 +21,22 @@ public class MqttConfig {
 
     private MqttClient client;
 
-    @Bean
-    public MqttClient mqttClient() throws MqttException, InterruptedException {
-        client = new MqttClient(brokerUrl, CLIENT_ID, new MemoryPersistence());
+    @Bean(name = "listenerMqttClient")
+    public MqttClient listenerMqttClient() throws MqttException {
+        MqttClient client = new MqttClient(brokerUrl, "LISTENER_CLIENT", new MemoryPersistence());
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setAutomaticReconnect(true);
         options.setCleanSession(false);
-        options.setMaxInflight(100);
+        client.connect(options);
+        return client;
+    }
 
-        int attempt = 0;
-        while (attempt < 5) {
-            try {
-                client.connect(options);
-                log.info("MQTT 브로커 연결 성공: {}", brokerUrl);
-                return client;
-            } catch (MqttException e) {
-                attempt++;
-                log.warn("MQTT 연결 시도 #{} 실패, 2초 후 재시도", attempt);
-                Thread.sleep(2000);
-            }
-        }
-        throw new MqttException(new Throwable("MQTT 브로커 연결 재시도 모두 실패"));
+    @Bean(name = "dummyPublisherMqttClient")
+    public MqttClient dummyPublisherMqttClient() throws MqttException {
+        MqttClient client = new MqttClient(brokerUrl, "DUMMY_PUB_CLIENT", new MemoryPersistence());
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setCleanSession(true);
+        client.connect(options);
+        return client;
     }
 
     @PreDestroy

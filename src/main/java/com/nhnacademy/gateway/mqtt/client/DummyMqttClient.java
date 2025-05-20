@@ -5,6 +5,7 @@ import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -14,10 +15,13 @@ import java.util.function.Supplier;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class DummyMqttClient {
 
     private final MqttClient client;
+
+    public DummyMqttClient(@Qualifier("dummyPublisherMqttClient") MqttClient client) {
+        this.client = client;
+    }
 
     private static final long PUBLISH_INTERVAL_MS = 60000;
 

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class MqttListener {
     private final MqttClient mqttClient;
     private final GateService gateService;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ExecutorService executor;
+
     private long gateId;
+
+    public MqttListener(
+            @Qualifier("listenerMqttClient") MqttClient mqttClient,
+            GateService gateService
+    ) {
+        this.mqttClient = mqttClient;
+        this.gateService = gateService;
+        this.executor = Executors.newFixedThreadPool(4);  // 직접 초기화
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void subscribe() throws MqttException {
