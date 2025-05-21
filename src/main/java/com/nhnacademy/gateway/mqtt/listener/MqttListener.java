@@ -18,6 +18,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -97,15 +98,44 @@ public class MqttListener {
         String position = getPart(parts, "n");
         String element = getPart(parts, "e");
 
-        // env, device 여부 판단
-        String type = topic.contains("/env/") ? "env" :
-                topic.contains("/device/") ? "device" : null;
+        if (place == null || deviceId == null || position == null || element == null) {
+            return null;
+        }
 
-        if (place == null || deviceId == null || position == null || element == null || type == null) {
+        // env/device 판단 로직: topic 경로 기반 or element 기반 유추
+        String type;
+
+        if (topic.contains("/env/")) {
+            type = "env";
+        } else if (topic.contains("/device/")) {
+            type = "device";
+        } else {
+            // 토픽 경로에 명시가 없다면 e 값으로 유추
+            type = inferTypeFromElement(element);
+        }
+
+        if (type == null) {
+            log.warn("type을 유추할 수 없음 - e: {}", element);
+
             return null;
         }
 
         return new TopicInfo(place, type, deviceId, position, element);
+    }
+
+    private String inferTypeFromElement(String element) {
+        // 측정 항목 이름에 따라 분류
+        Set<String> envElements = Set.of("temperature", "humidity", "co2", "noise");
+        Set<String> deviceElements = Set.of("power", "current", "voltage", "watt");
+
+        if (envElements.contains(element.toLowerCase())) {
+            return "env";
+        } else if (deviceElements.contains(element.toLowerCase())) {
+            return "device";
+        }
+
+        // 타입이 맞지 않으면 null 반환으로 데이터 무시
+        return null;
     }
 
     private String getPart(String[] parts, String key) {
