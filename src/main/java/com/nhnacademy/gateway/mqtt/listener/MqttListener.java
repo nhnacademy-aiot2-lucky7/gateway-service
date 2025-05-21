@@ -18,7 +18,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,18 +29,30 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class MqttListener {
     private final MqttClient mqttClient;
+    private final MqttClient dummyClient;
     private final GateService gateService;
     private final ExecutorService executor;
 
     private long gateId;
 
+    private static final Set<String> requiredEnvElements =
+            Set.of("temperature", "humidity", "dust", "smoke");
+    private static final Set<String> requiredDeviceElements =
+            Set.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
+
+    // 위치별로 수신된 env 요소를 기록
+    private final Map<String, Set<String>> receivedEnv = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> receivedDevice = new ConcurrentHashMap<>();
+
     public MqttListener(
             @Qualifier("listenerMqttClient") MqttClient mqttClient,
+            @Qualifier("dummyPublisherMqttClient") MqttClient dummyClient,  // ➍ 주입
             GateService gateService
     ) {
         this.mqttClient = mqttClient;
+        this.dummyClient = dummyClient;
         this.gateService = gateService;
-        this.executor = Executors.newFixedThreadPool(4);  // 직접 초기화
+        this.executor = Executors.newFixedThreadPool(4);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -72,10 +87,56 @@ public class MqttListener {
                 String messageContent = buildNewMessage(timestamp, value);
 
                 publishMessage(newTopic, messageContent);
+
+                trackReceived(topicInfo);
+                publishMissingDummy(topicInfo);
             } catch (Exception e) {
                 log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
             }
         });
+    }
+
+    private void trackReceived(TopicInfo info) {
+        String key = info.getPlace() + "|" + info.getPosition();
+        if ("env".equals(info.getType())) {
+            receivedEnv.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                    .add(info.getElement());
+        } else if ("device".equals(info.getType())) {
+            receivedDevice.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                    .add(info.getElement());
+        }
+    }
+
+    // 누락된 요소가 있으면 즉시 더미 발행
+    private void publishMissingDummy(TopicInfo info) throws MqttException {
+        String key = info.getPlace() + "|" + info.getPosition();
+        Set<String> required = "env".equals(info.getType())
+                ? requiredEnvElements
+                : requiredDeviceElements;
+        Map<String, Set<String>> receivedMap = "env".equals(info.getType())
+                ? receivedEnv
+                : receivedDevice;
+
+        Set<String> receivedSet = receivedMap.getOrDefault(key, Collections.emptySet());
+        for (String elem : required) {
+            if (!receivedSet.contains(elem)) {
+                // 누락된 항목에 대해 더미 메시지 즉시 생성
+                String dummyTopic = buildNewTopic(
+                        new TopicInfo(info.getPlace(), info.getType(),
+                                /*dummyId*/ info.getDeviceId(),
+                                info.getPosition(), elem),
+                        gateId
+                );
+                String payload = buildNewMessage(System.currentTimeMillis(), /*랜덤값 등*/ 0.0);
+                MqttMessage m = new MqttMessage(payload.getBytes());
+                m.setQos(0);
+                dummyClient.publish(dummyTopic, m);
+                log.info("더미 메시지 발행 - {}, {}", dummyTopic, payload);
+                // 발행 즉시 receivedSet 에 추가해 중복 방지
+                receivedMap.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                        .add(elem);
+            }
+        }
     }
 
     private long registerGateway() {
@@ -152,12 +213,12 @@ public class MqttListener {
 
     private String buildNewTopic(TopicInfo info, long gatewayId) {
         return String.format(
-                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/g/%d/n/%s/e/%s",
+                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
                 info.getPlace(),
+                info.getPosition(),
                 info.getType(),
                 info.getDeviceId(),
                 gatewayId,
-                info.getPosition(),
                 info.getElement()
         );
     }
