@@ -30,7 +30,7 @@ public class MqttListener {
     private final ExecutorService executor;
 
     private long gateId;
-    private boolean detectionDone = false;
+    private boolean collecting = false;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -64,14 +64,44 @@ public class MqttListener {
 
         log.info("토픽 패턴 구독 완료: data/#");
 
+        collecting = true;
         scheduler.schedule(this::detectMissing, 2, TimeUnit.MINUTES);
         log.info("누락 데이터 검사 스케줄링 완료");
     }
 
-    @Scheduled(initialDelay = 120_000, fixedDelayString = "${app.detect.fixedDelay:2147483647}")
+    private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
+        String payload = new String(message.getPayload());
+        log.debug("메시지 수신 - 토픽: {}, 페이로드: {}", topic, payload);
+
+        executor.submit(() -> {
+            try {
+                JsonNode node = objectMapper.readTree(payload);
+                double value = node.get("value").asDouble();
+                long timestamp = node.has("time") ? node.get("time").asLong() : System.currentTimeMillis();
+
+                TopicInfo topicInfo = parseTopicParts(topic);
+                if (topicInfo == null) {
+                    log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
+
+                    return;
+                }
+
+                String newTopic = buildNewTopic(topicInfo, gateId);
+                String messageContent = buildNewMessage(timestamp, value);
+
+                publishMessage(newTopic, messageContent);
+
+                trackReceived(topicInfo);
+
+            } catch (Exception e) {
+                log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
+            }
+        });
+    }
+
     private void detectMissing() {
-        if (detectionDone) return;
-        detectionDone = true;
+        if (!collecting) return;
+        collecting = false;
         log.info("=== 누락 데이터 검사 시작 ===");
 
         // Env 누락 검사
@@ -99,35 +129,19 @@ public class MqttListener {
         });
 
         log.info("=== 누락 데이터 검사 완료 ===");
+        scheduler.shutdown();
     }
 
-    private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
-        String payload = new String(message.getPayload());
-        log.debug("메시지 수신 - 토픽: {}, 페이로드: {}", topic, payload);
-
-        executor.submit(() -> {
-            try {
-                JsonNode node = objectMapper.readTree(payload);
-                double value = node.get("value").asDouble();
-                long timestamp = node.has("time") ? node.get("time").asLong() : System.currentTimeMillis();
-
-                TopicInfo topicInfo = parseTopicParts(topic);
-                if (topicInfo == null) {
-                    log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
-
-                    return;
-                }
-
-                String newTopic = buildNewTopic(topicInfo, gateId);
-                String messageContent = buildNewMessage(timestamp, value);
-
-                publishMessage(newTopic, messageContent);
-
-
-            } catch (Exception e) {
-                log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
-            }
-        });
+    private void trackReceived(TopicInfo info) {
+        if (!collecting) return;                         // ❗ 수집 중 아닐 땐 무시
+        String key = info.getPlace() + "|" + info.getPosition();
+        if ("env".equals(info.getType())) {
+            receivedEnv.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                    .add(info.getElement());
+        } else {
+            receivedDevice.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
+                    .add(info.getElement());
+        }
     }
 
     private long registerGateway() {
