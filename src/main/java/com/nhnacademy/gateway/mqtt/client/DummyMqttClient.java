@@ -116,7 +116,7 @@ public class DummyMqttClient {
         }
     }
 
-    private String generateDeviceId() {
+    public String generateDeviceId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 
@@ -177,13 +177,10 @@ public class DummyMqttClient {
 
     public void publishDummyElements(
             String place, String position, String type,
-            long gatewayId, List<String> elements
+            long gatewayId, String deviceId, List<String> elements
     ) {
-        String deviceId = generateDeviceId();
-
         for (String elem : elements) {
             try {
-
                 String topic = String.format(
                         "project-data/s/nhnacademy/b/gyeongnam_campus"
                                 + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",

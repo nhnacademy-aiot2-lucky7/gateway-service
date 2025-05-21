@@ -111,7 +111,7 @@ public class MqttListener {
 
     // 누락된 요소가 있으면 즉시 더미 발행
     private void publishMissingDummy(TopicInfo info) {
-        String key = info.getPlace() + "|" + info.getPosition() + "|" + info.getDeviceId();
+        String key = info.getPlace() + "|" + info.getPosition(); // deviceId 제거
         Set<String> required = "env".equals(info.getType())
                 ? requiredEnvElements
                 : requiredDeviceElements;
@@ -123,18 +123,55 @@ public class MqttListener {
         List<String> missing = required.stream()
                 .filter(elem -> !receivedSet.contains(elem))
                 .toList();
-
         if (missing.isEmpty()) return;
 
-        dummyPublisher.publishDummyElements(
-                info.getPlace(),
-                info.getPosition(),
-                info.getType(),
-                gateId,
-                missing
-        );
+        if ("env".equals(info.getType())) {
+            List<String> tempHum = missing.stream()
+                    .filter(e -> e.equals("temperature") || e.equals("humidity"))
+                    .toList();
+            List<String> others = missing.stream()
+                    .filter(e -> !tempHum.contains(e))
+                    .toList();
 
-        receivedSet.addAll(missing);
+            if (!tempHum.isEmpty()) {
+                String deviceId = dummyPublisher.generateDeviceId(); // 1개의 ID 생성
+                dummyPublisher.publishDummyElements(
+                        info.getPlace(),
+                        info.getPosition(),
+                        info.getType(),
+                        gateId,
+                        deviceId,
+                        tempHum
+                );
+                receivedSet.addAll(tempHum);
+            }
+
+            for (String elem : others) {
+                String deviceId = dummyPublisher.generateDeviceId(); // 각 요소마다 ID 생성
+                dummyPublisher.publishDummyElements(
+                        info.getPlace(),
+                        info.getPosition(),
+                        info.getType(),
+                        gateId,
+                        deviceId,
+                        List.of(elem)
+                );
+                receivedSet.add(elem);
+            }
+        } else {
+            for (String elem : missing) {
+                String deviceId = dummyPublisher.generateDeviceId(); // 각 센서마다
+                dummyPublisher.publishDummyElements(
+                        info.getPlace(),
+                        info.getPosition(),
+                        info.getType(),
+                        gateId,
+                        deviceId,
+                        List.of(elem)
+                );
+                receivedSet.add(elem);
+            }
+        }
     }
 
     private long registerGateway() {
