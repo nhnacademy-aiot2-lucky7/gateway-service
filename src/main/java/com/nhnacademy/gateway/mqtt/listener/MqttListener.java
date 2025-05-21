@@ -121,15 +121,18 @@ public class MqttListener {
         if (missing.isEmpty()) return;
 
         if ("env".equals(info.getType())) {
+            // 온도/습도는 한 디바이스에 담을 수 있음
             List<String> tempHum = missing.stream()
                     .filter(e -> e.equals("temperature") || e.equals("humidity"))
                     .toList();
+
             List<String> others = missing.stream()
                     .filter(e -> !tempHum.contains(e))
                     .toList();
 
             if (!tempHum.isEmpty()) {
-                String deviceId = dummyPublisher.generateDeviceId(); // 1개의 ID 생성
+                // ❗ 온습도는 하나의 deviceId로
+                String deviceId = dummyPublisher.generateDeviceId();
                 dummyPublisher.publishDummyElements(
                         info.getPlace(),
                         info.getPosition(),
@@ -142,7 +145,8 @@ public class MqttListener {
             }
 
             for (String elem : others) {
-                String deviceId = dummyPublisher.generateDeviceId(); // 각 요소마다 ID 생성
+                // ❗ 먼지, 연기 각각에 새로운 deviceId
+                String deviceId = dummyPublisher.generateDeviceId();
                 dummyPublisher.publishDummyElements(
                         info.getPlace(),
                         info.getPosition(),
