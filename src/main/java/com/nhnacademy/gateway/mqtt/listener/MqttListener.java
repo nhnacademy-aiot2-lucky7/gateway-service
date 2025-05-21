@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -26,10 +27,12 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class MqttListener {
     private final MqttClient mqttClient;
+    private final DummyMqttClient dummyPublisher;
     private final GateService gateService;
     private final ExecutorService executor;
 
     private long gateId;
+    private boolean detectionDone = false;
 
     private static final Set<String> requiredEnvElements =
             Set.of("temperature", "humidity", "dust", "smoke");
@@ -42,9 +45,11 @@ public class MqttListener {
 
     public MqttListener(
             @Qualifier("listenerMqttClient") MqttClient mqttClient,
+            DummyMqttClient dummyPublisher,
             GateService gateService
     ) {
         this.mqttClient = mqttClient;
+        this.dummyPublisher = dummyPublisher;
         this.gateService = gateService;
         this.executor = Executors.newFixedThreadPool(4);
     }
@@ -58,6 +63,33 @@ public class MqttListener {
                 handleMessage(objectMapper, topic, message));
 
         log.info("토픽 패턴 구독 완료: data/#");
+    }
+
+    @Scheduled(initialDelay = 120_000, fixedDelay = Long.MAX_VALUE)
+    public void detectMissing() {
+        if (detectionDone) return;
+        detectionDone = true;
+
+        receivedEnv.forEach((key, set) -> {
+            List<String> missing = new ArrayList<>();
+            for (String elem : requiredEnvElements) {
+                if (!set.contains(elem)) missing.add(elem);
+            }
+            if (!missing.isEmpty()) {
+                String[] parts = key.split("\\|");
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", gateId, missing);  // 수정
+            }
+        });
+        receivedDevice.forEach((key, set) -> {
+            List<String> missing = new ArrayList<>();
+            for (String elem : requiredDeviceElements) {
+                if (!set.contains(elem)) missing.add(elem);
+            }
+            if (!missing.isEmpty()) {
+                String[] parts = key.split("\\|");
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", gateId, missing);  // 수정
+            }
+        });
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
@@ -81,6 +113,8 @@ public class MqttListener {
                 String messageContent = buildNewMessage(timestamp, value);
 
                 publishMessage(newTopic, messageContent);
+
+
             } catch (Exception e) {
                 log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
             }

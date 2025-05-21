@@ -36,9 +36,6 @@ public class DummyMqttClient {
             "undefined", List.of("위치1")
     );
 
-    private static final List<String> ENV_ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
-    private static final List<String> DEVICE_ELEMENTS = List.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
-
     public DummyMqttClient(@Qualifier("dummyPublisherMqttClient") MqttClient client) {
         this.client = client;
     }
@@ -113,6 +110,23 @@ public class DummyMqttClient {
                 log.error("메시지 발행 실패 - 토픽: {}, 오류: {}", task.topic, e.getMessage(), e);
                 throw new MqttConnectionException("Mqtt 메시지 발행 실패");
             }
+        }
+    }
+
+    public void scheduleDummyElements(
+            String place,
+            String position,
+            String type,
+            long gatewayId,
+            List<String> elements
+    ) {
+        String deviceId = generateDeviceId();  // 그룹용 UUID
+        for (String elem : elements) {
+            String topic = String.format(
+                    "data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
+                    place, position, type, deviceId, gatewayId, elem
+            );
+            publishTasks.add(new PublishTask(topic, getPayloadSupplierForElement(elem)));
         }
     }
 
