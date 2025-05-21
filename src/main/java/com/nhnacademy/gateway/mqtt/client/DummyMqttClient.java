@@ -86,7 +86,7 @@ public class DummyMqttClient {
     }
 
     String buildTopic(TopicInfo topicInfo) {
-        return String.format("data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
+        return String.format("dummy_data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 topicInfo.getPlace(),
                 topicInfo.getType(),
                 topicInfo.getDeviceId(),
