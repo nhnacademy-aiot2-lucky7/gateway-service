@@ -26,6 +26,7 @@ public class MqttConfig {
         MqttClient client = new MqttClient(brokerUrl, "LISTENER_CLIENT", new MemoryPersistence());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(false);
+        options.setMaxInflight(100);
         client.connect(options);
         return client;
     }
@@ -35,6 +36,7 @@ public class MqttConfig {
         MqttClient client = new MqttClient(brokerUrl, "DUMMY_PUB_CLIENT", new MemoryPersistence());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
+        options.setMaxInflight(100);
         client.connect(options);
         return client;
     }
