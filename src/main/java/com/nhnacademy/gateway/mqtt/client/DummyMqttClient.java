@@ -116,7 +116,7 @@ public class DummyMqttClient {
         }
     }
 
-    public String generateDeviceId() {
+    private String generateDeviceId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 
@@ -172,35 +172,6 @@ public class DummyMqttClient {
         PublishTask(String topic, Supplier<String> payloadSupplier) {
             this.topic = topic;
             this.payloadSupplier = payloadSupplier;
-        }
-    }
-
-    public void publishDummyElements(
-            String place, String position, String type,
-            long gatewayId, String deviceId, List<String> elements
-    ) {
-        for (String elem : elements) {
-            try {
-                String topic = String.format(
-                        "project-data/s/nhnacademy/b/gyeongnam_campus"
-                                + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
-                        place, position, type, deviceId, gatewayId, elem
-                );
-                String payload = String.format(
-                        "{\"time\": %d, \"value\": %.2f}",
-                        System.currentTimeMillis(),
-                        RANDOM.nextDouble() * 100
-                );
-
-                MqttMessage msg = new MqttMessage(payload.getBytes());
-                msg.setQos(0);
-                client.publish(topic, msg);
-                log.info("[Dummy] 더미 메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
-
-            } catch (MqttException e) {
-                log.error("[Dummy] 더미 발행 실패 - place: {}, position: {}, element: {}",
-                        place, position, elem, e);
-            }
         }
     }
 }

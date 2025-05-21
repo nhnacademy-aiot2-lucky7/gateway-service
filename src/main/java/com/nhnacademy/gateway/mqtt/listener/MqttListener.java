@@ -26,7 +26,6 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class MqttListener {
     private final MqttClient mqttClient;
-    private final DummyMqttClient dummyPublisher;
     private final GateService gateService;
     private final ExecutorService executor;
 
@@ -43,11 +42,9 @@ public class MqttListener {
 
     public MqttListener(
             @Qualifier("listenerMqttClient") MqttClient mqttClient,
-            DummyMqttClient dummyPublisher,
             GateService gateService
     ) {
         this.mqttClient = mqttClient;
-        this.dummyPublisher = dummyPublisher;
         this.gateService = gateService;
         this.executor = Executors.newFixedThreadPool(4);
     }
@@ -84,93 +81,10 @@ public class MqttListener {
                 String messageContent = buildNewMessage(timestamp, value);
 
                 publishMessage(newTopic, messageContent);
-
-                trackReceived(topicInfo);
-                publishMissingDummy(topicInfo);
             } catch (Exception e) {
                 log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
             }
         });
-    }
-
-    private void trackReceived(TopicInfo info) {
-        String key = info.getPlace() + "|" + info.getPosition();
-        if ("env".equals(info.getType())) {
-            receivedEnv.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
-                    .add(info.getElement());
-        } else if ("device".equals(info.getType())) {
-            receivedDevice.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
-                    .add(info.getElement());
-        }
-    }
-
-    // 누락된 요소가 있으면 즉시 더미 발행
-    private void publishMissingDummy(TopicInfo info) {
-        String key = info.getPlace() + "|" + info.getPosition(); // deviceId 제거
-        Set<String> required = "env".equals(info.getType())
-                ? requiredEnvElements
-                : requiredDeviceElements;
-        Map<String, Set<String>> receivedMap = "env".equals(info.getType())
-                ? receivedEnv
-                : receivedDevice;
-        Set<String> receivedSet = receivedMap.computeIfAbsent(key, k -> new HashSet<>());
-
-        List<String> missing = required.stream()
-                .filter(elem -> !receivedSet.contains(elem))
-                .toList();
-        if (missing.isEmpty()) return;
-
-        if ("env".equals(info.getType())) {
-            // 온도/습도는 한 디바이스에 담을 수 있음
-            List<String> tempHum = missing.stream()
-                    .filter(e -> e.equals("temperature") || e.equals("humidity"))
-                    .toList();
-
-            List<String> others = missing.stream()
-                    .filter(e -> !tempHum.contains(e))
-                    .toList();
-
-            if (!tempHum.isEmpty()) {
-                // ❗ 온습도는 하나의 deviceId로
-                String deviceId = dummyPublisher.generateDeviceId();
-                dummyPublisher.publishDummyElements(
-                        info.getPlace(),
-                        info.getPosition(),
-                        info.getType(),
-                        gateId,
-                        deviceId,
-                        tempHum
-                );
-                receivedSet.addAll(tempHum);
-            }
-
-            for (String elem : others) {
-                // ❗ 먼지, 연기 각각에 새로운 deviceId
-                String deviceId = dummyPublisher.generateDeviceId();
-                dummyPublisher.publishDummyElements(
-                        info.getPlace(),
-                        info.getPosition(),
-                        info.getType(),
-                        gateId,
-                        deviceId,
-                        List.of(elem)
-                );
-                receivedSet.add(elem);
-            }
-        } else {
-            for (String elem : missing) {
-                String deviceId = dummyPublisher.generateDeviceId(); // 각 센서마다
-                dummyPublisher.publishDummyElements(
-                        info.getPlace(),
-                        info.getPosition(),
-                        info.getType(),
-                        gateId,
-                        deviceId,
-                        List.of(elem)
-                );
-                receivedSet.add(elem);
-            }
-        }
     }
 
     private long registerGateway() {
