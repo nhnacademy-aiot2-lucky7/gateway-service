@@ -121,6 +121,9 @@ public class DummyMqttClient {
             List<String> elements
     ) {
         String deviceId = generateDeviceId();
+
+        log.info("[DummyScheduler] 누락된 {} [{}] 을(를) 디바이스ID={} 로 스케줄링합니다.", type, elements, deviceId);
+
         for (String elem : elements) {
             String topic = String.format(
                     "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",

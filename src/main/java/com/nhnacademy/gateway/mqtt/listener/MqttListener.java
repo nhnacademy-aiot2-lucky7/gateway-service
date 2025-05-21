@@ -19,9 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Component
 @Slf4j
@@ -33,6 +31,8 @@ public class MqttListener {
 
     private long gateId;
     private boolean detectionDone = false;
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private static final Set<String> requiredEnvElements =
             Set.of("temperature", "humidity", "dust", "smoke");
@@ -63,33 +63,41 @@ public class MqttListener {
                 handleMessage(objectMapper, topic, message));
 
         log.info("토픽 패턴 구독 완료: data/#");
+
+        scheduler.schedule(this::detectMissing, 2, TimeUnit.MINUTES);
+        log.info("누락 데이터 검사 스케줄링 완료");
     }
 
-    @Scheduled(initialDelay = 120_000, fixedDelay = Long.MAX_VALUE)
-    public void detectMissing() {
+    private void detectMissing() {
         if (detectionDone) return;
         detectionDone = true;
+        log.info("=== 누락 데이터 검사 시작 ===");
 
+        // Env 누락 검사
         receivedEnv.forEach((key, set) -> {
-            List<String> missing = new ArrayList<>();
-            for (String elem : requiredEnvElements) {
-                if (!set.contains(elem)) missing.add(elem);
-            }
+            List<String> missing = requiredEnvElements.stream()
+                    .filter(e -> !set.contains(e))
+                    .toList();
             if (!missing.isEmpty()) {
                 String[] parts = key.split("\\|");
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", gateId, missing);  // 수정
+                log.info("[Detect] env 누락: {} at {} → {}", parts[0], parts[1], missing);
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", gateId, missing);
             }
         });
+
+        // Device 누락 검사
         receivedDevice.forEach((key, set) -> {
-            List<String> missing = new ArrayList<>();
-            for (String elem : requiredDeviceElements) {
-                if (!set.contains(elem)) missing.add(elem);
-            }
+            List<String> missing = requiredDeviceElements.stream()
+                    .filter(e -> !set.contains(e))
+                    .toList();
             if (!missing.isEmpty()) {
                 String[] parts = key.split("\\|");
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", gateId, missing);  // 수정
+                log.info("[Detect] device 누락: {} at {} → {}", parts[0], parts[1], missing);
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", gateId, missing);
             }
         });
+
+        log.info("=== 누락 데이터 검사 완료 ===");
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
@@ -219,6 +227,7 @@ public class MqttListener {
     @PreDestroy
     public void shutdownExecutor() {
         executor.shutdown();
+        scheduler.shutdown();
         log.info("ExecutorService 정상 종료됨.");
     }
 }
