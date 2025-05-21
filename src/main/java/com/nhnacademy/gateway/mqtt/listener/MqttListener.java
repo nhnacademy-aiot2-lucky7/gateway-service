@@ -164,7 +164,10 @@ public class MqttListener {
         );
 
         long id = gateService.createGate(gateRegisterRequest);
+        gateService.changeActivate(id);
+
         log.info("게이트웨이 등록 완료 - ID: {}", id);
+
         return id;
     }
 

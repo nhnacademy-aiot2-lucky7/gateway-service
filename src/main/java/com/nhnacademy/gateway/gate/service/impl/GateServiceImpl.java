@@ -87,6 +87,16 @@ public class GateServiceImpl implements GateService {
 
         Gate gate = findGateOrThrowWithErrorEvent(gateNo, departmentId, "존재하지 않는 게이트웨이 수정 요청");
 
+        boolean isExistAddress = gateRepository.existsByBrokerIpAndPort(
+                gateUpdateRequest.getBrokerIp(),
+                gateUpdateRequest.getPort()
+        );
+
+        if (isExistAddress) {
+            sendErrorEvent(null, departmentId, "중복된 게이트웨이 주소");
+            throw new ConflictException("이미 사용 중인 주소입니다.");
+        }
+
         boolean protocolChanged = !Objects.equals(gate.getProtocol(), gateUpdateRequest.getProtocol());
         boolean ipChanged = !Objects.equals(gate.getBrokerIp(), gateUpdateRequest.getBrokerIp());
         boolean portChanged = !Objects.equals(gate.getPort(), gateUpdateRequest.getPort());
