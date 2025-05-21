@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
 import com.nhnacademy.gateway.gate.service.GateService;
+import com.nhnacademy.gateway.mqtt.client.DummyMqttClient;
 import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
 import com.nhnacademy.gateway.user.common.UserContextHolder;
 import jakarta.annotation.PostConstruct;
@@ -29,7 +30,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class MqttListener {
     private final MqttClient mqttClient;
-    private final MqttClient dummyClient;
+    private final DummyMqttClient dummyPublisher;
     private final GateService gateService;
     private final ExecutorService executor;
 
@@ -46,11 +47,11 @@ public class MqttListener {
 
     public MqttListener(
             @Qualifier("listenerMqttClient") MqttClient mqttClient,
-            @Qualifier("dummyPublisherMqttClient") MqttClient dummyClient,  // ➍ 주입
+            DummyMqttClient dummyPublisher,
             GateService gateService
     ) {
         this.mqttClient = mqttClient;
-        this.dummyClient = dummyClient;
+        this.dummyPublisher = dummyPublisher;
         this.gateService = gateService;
         this.executor = Executors.newFixedThreadPool(4);
     }
@@ -108,7 +109,7 @@ public class MqttListener {
     }
 
     // 누락된 요소가 있으면 즉시 더미 발행
-    private void publishMissingDummy(TopicInfo info) throws MqttException {
+    private void publishMissingDummy(TopicInfo info) {
         String key = info.getPlace() + "|" + info.getPosition();
         Set<String> required = "env".equals(info.getType())
                 ? requiredEnvElements
@@ -120,19 +121,15 @@ public class MqttListener {
         Set<String> receivedSet = receivedMap.getOrDefault(key, Collections.emptySet());
         for (String elem : required) {
             if (!receivedSet.contains(elem)) {
-                // 누락된 항목에 대해 더미 메시지 즉시 생성
-                String dummyTopic = buildNewTopic(
-                        new TopicInfo(info.getPlace(), info.getType(),
-                                /*dummyId*/ info.getDeviceId(),
-                                info.getPosition(), elem),
-                        gateId
+                dummyPublisher.publishDummyElement(
+                        info.getPlace(),
+                        info.getPosition(),
+                        info.getType(),
+                        gateId,
+                        elem
                 );
-                String payload = buildNewMessage(System.currentTimeMillis(), /*랜덤값 등*/ 0.0);
-                MqttMessage m = new MqttMessage(payload.getBytes());
-                m.setQos(0);
-                dummyClient.publish(dummyTopic, m);
-                log.info("더미 메시지 발행 - {}, {}", dummyTopic, payload);
-                // 발행 즉시 receivedSet 에 추가해 중복 방지
+
+                // 중복 방지
                 receivedMap.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
                         .add(elem);
             }

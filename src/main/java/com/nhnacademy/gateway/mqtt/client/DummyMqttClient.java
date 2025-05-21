@@ -19,8 +19,25 @@ import java.util.function.Supplier;
 public class DummyMqttClient {
 
     private final MqttClient client;
+    private static final Random RANDOM = new Random(); // 수정: 랜덤값 생성용
 
     private final List<PublishTask> publishTasks = new CopyOnWriteArrayList<>();
+
+    private static final long PUBLISH_INTERVAL_MS = 60000;
+
+    private static final Map<String, List<String>> SPACE_POSITIONS = Map.of(
+            "office", List.of("위치1", "위치2", "장비1", "장비2"),
+            "class_a", List.of("위치1", "위치2", "장비1", "장비2"),
+            "class_b", List.of("위치1", "위치2", "장비1", "장비2"),
+            "server_room", List.of("위치1", "위치2", "위치3", "장비1", "장비2"),
+            "hive", List.of("위치1", "위치2", "장비1", "장비2"),
+            "pair_room", List.of("위치1", "위치2", "장비1", "장비2"),
+            "meeting_room", List.of("위치1", "위치2", "장비1", "장비2"),
+            "undefined", List.of("위치1")
+    );
+
+    private static final List<String> ENV_ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
+    private static final List<String> DEVICE_ELEMENTS = List.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
 
     public DummyMqttClient(@Qualifier("dummyPublisherMqttClient") MqttClient client) {
         this.client = client;
@@ -158,19 +175,35 @@ public class DummyMqttClient {
         }
     }
 
-    private static final long PUBLISH_INTERVAL_MS = 60000;
+    public void publishDummyElement(
+            String place, String position, String type,
+            long gatewayId, String element
+    ) {
+        try {
+            // 1) 새로운 deviceId 생성
+            String deviceId = generateDeviceId();
 
-    private static final Map<String, List<String>> SPACE_POSITIONS = Map.of(
-            "office", List.of("위치1", "위치2", "장비1", "장비2"),
-            "class_a", List.of("위치1", "위치2", "장비1", "장비2"),
-            "class_b", List.of("위치1", "위치2", "장비1", "장비2"),
-            "server_room", List.of("위치1", "위치2", "위치3", "장비1", "장비2"),
-            "hive", List.of("위치1", "위치2", "장비1", "장비2"),
-            "pair_room", List.of("위치1", "위치2", "장비1", "장비2"),
-            "meeting_room", List.of("위치1", "위치2", "장비1", "장비2"),
-            "undefined", List.of("위치1")
-    );
+            // 2) 토픽 생성
+            String topic = String.format(
+                    "project-data/s/nhnacademy/b/gyeongnam_campus"
+                            + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
+                    place, position, type, deviceId, gatewayId, element
+            );
 
-    private static final List<String> ENV_ELEMENTS = List.of("temperature", "humidity", "dust", "smoke");
-    private static final List<String> DEVICE_ELEMENTS = List.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
+            // 3) 페이로드 생성(랜덤값)
+            String payload = String.format(
+                    "{\"time\": %d, \"value\": %.2f}",
+                    System.currentTimeMillis(),
+                    RANDOM.nextDouble() * 100
+            );
+
+            // 4) 발행
+            MqttMessage msg = new MqttMessage(payload.getBytes());
+            msg.setQos(0);
+            client.publish(topic, msg);
+            log.info("[Dummy] 더미 메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
+        } catch (MqttException e) {
+            log.error("[Dummy] 더미 발행 실패 - place: {}, position: {}, element: {}", place, position, element, e);
+        }
+    }
 }
