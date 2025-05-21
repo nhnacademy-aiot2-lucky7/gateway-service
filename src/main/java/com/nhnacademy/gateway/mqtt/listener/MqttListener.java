@@ -63,7 +63,8 @@ public class MqttListener {
 
                 TopicInfo topicInfo = parseTopicParts(topic);
                 if (topicInfo == null) {
-                    log.warn("잘못된 토픽 형식: {}", topic);
+                    log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
+
                     return;
                 }
 
@@ -99,10 +100,12 @@ public class MqttListener {
         String element = getPart(parts, "e");
 
         if (place == null || deviceId == null || position == null || element == null) {
+            log.warn("토픽 필수 파트 누락 - topic: {}", topic);
+
             return null;
         }
 
-        // env/device 판단 로직: topic 경로 기반 or element 기반 유추
+        // env 또는 device 판단 로직 : topic 경로 기반 or element 기반 유추
         String type;
 
         if (topic.contains("/env/")) {
@@ -115,7 +118,7 @@ public class MqttListener {
         }
 
         if (type == null) {
-            log.warn("type을 유추할 수 없음 - e: {}", element);
+            log.warn("측정 항목에 따른 type 유추 실패 - element: {}", element);
 
             return null;
         }

@@ -39,15 +39,33 @@ public class DummyMqttClient {
                 List<String> positions = entry.getValue();
 
                 for (String position : positions) {
-                    String deviceId = generateDeviceId();
                     if (position.startsWith("위치")) {
-                        for (String element : ENV_ELEMENTS) {
-                            TopicInfo info = new TopicInfo(place, "env", deviceId, position, element);
-                            publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
-                        }
+                        // 온습도는 하나의 센서로 측정
+                        String envDeviceId1 = generateDeviceId();
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId1, position, "temperature")), getPayloadSupplierForElement("temperature")));
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId1, position, "humidity")), getPayloadSupplierForElement("humidity")));
+
+                        // 먼지 센서
+                        String envDeviceId2 = generateDeviceId();
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId2, position, "dust")), getPayloadSupplierForElement("dust")));
+
+                        // 연기 센서
+                        String envDeviceId3 = generateDeviceId();
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId3, position, "smoke")), getPayloadSupplierForElement("smoke")));
+
                     } else if (position.startsWith("장비")) {
-                        for (String element : DEVICE_ELEMENTS) {
-                            TopicInfo info = new TopicInfo(place, "device", deviceId, position, element);
+                        // 진동 센서
+                        String vibrationDeviceId = generateDeviceId();
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "device", vibrationDeviceId, position, "vibration")), getPayloadSupplierForElement("vibration")));
+
+                        // 소음 센서
+                        String noiseDeviceId = generateDeviceId();
+                        publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "device", noiseDeviceId, position, "noise")), getPayloadSupplierForElement("noise")));
+
+                        // PDU 센서 (voltage, current, power, energy는 하나의 장비로 측정)
+                        String pduDeviceId = generateDeviceId();
+                        for (String element : List.of("pdu_voltage", "pdu_current", "pdu_power", "pdu_energy")) {
+                            TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
                             publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
                         }
                     }
