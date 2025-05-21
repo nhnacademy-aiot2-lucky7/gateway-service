@@ -120,10 +120,10 @@ public class DummyMqttClient {
             long gatewayId,
             List<String> elements
     ) {
-        String deviceId = generateDeviceId();  // 그룹용 UUID
+        String deviceId = generateDeviceId();
         for (String elem : elements) {
             String topic = String.format(
-                    "data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
+                    "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
                     place, position, type, deviceId, gatewayId, elem
             );
             publishTasks.add(new PublishTask(topic, getPayloadSupplierForElement(elem)));
