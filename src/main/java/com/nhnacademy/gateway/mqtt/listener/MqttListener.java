@@ -112,8 +112,12 @@ public class MqttListener {
                 String[] parts = key.split("\\|");
                 log.info("[Detect] env 누락: {} at {} → {}", parts[0], parts[1], missing);
 
-                String deviceId = dummyPublisher.generateDeviceId();
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", deviceId, gateId, missing);
+                missing.forEach(element -> {
+                    String deviceId = dummyPublisher.generateDeviceId();
+                    dummyPublisher.scheduleDummyElements(
+                            parts[0], parts[1], "env", deviceId, gateId, List.of(element)
+                    );
+                });
             }
         });
 
@@ -126,8 +130,12 @@ public class MqttListener {
                 String[] parts = key.split("\\|");
                 log.info("[Detect] device 누락: {} at {} → {}", parts[0], parts[1], missing);
 
-                String deviceId = dummyPublisher.generateDeviceId();
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", deviceId, gateId, missing);
+                missing.forEach(element -> {
+                    String deviceId = dummyPublisher.generateDeviceId();
+                    dummyPublisher.scheduleDummyElements(
+                            parts[0], parts[1], "device", deviceId, gateId, List.of(element)
+                    );
+                });
             }
         });
 
