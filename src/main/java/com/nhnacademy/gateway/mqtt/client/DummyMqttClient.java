@@ -117,11 +117,10 @@ public class DummyMqttClient {
             String place,
             String position,
             String type,
+            String deviceId,
             long gatewayId,
             List<String> elements
     ) {
-        String deviceId = generateDeviceId();
-
         log.info("[DummyScheduler] 누락된 {} [{}] 을(를) 디바이스ID={} 로 스케줄링합니다.", type, elements, deviceId);
 
         for (String elem : elements) {
@@ -133,7 +132,7 @@ public class DummyMqttClient {
         }
     }
 
-    private String generateDeviceId() {
+    public String generateDeviceId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 

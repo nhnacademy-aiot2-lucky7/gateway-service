@@ -66,7 +66,6 @@ public class MqttListener {
 
         collecting = true;
         scheduler.schedule(this::detectMissing, 2, TimeUnit.MINUTES);
-        log.info("누락 데이터 검사 스케줄링 완료");
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
@@ -112,7 +111,9 @@ public class MqttListener {
             if (!missing.isEmpty()) {
                 String[] parts = key.split("\\|");
                 log.info("[Detect] env 누락: {} at {} → {}", parts[0], parts[1], missing);
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", gateId, missing);
+
+                String deviceId = dummyPublisher.generateDeviceId();
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "env", deviceId, gateId, missing);
             }
         });
 
@@ -124,7 +125,9 @@ public class MqttListener {
             if (!missing.isEmpty()) {
                 String[] parts = key.split("\\|");
                 log.info("[Detect] device 누락: {} at {} → {}", parts[0], parts[1], missing);
-                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", gateId, missing);
+
+                String deviceId = dummyPublisher.generateDeviceId();
+                dummyPublisher.scheduleDummyElements(parts[0], parts[1], "device", deviceId, gateId, missing);
             }
         });
 
