@@ -20,6 +20,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,30 +111,30 @@ public class MqttListener {
 
     // 누락된 요소가 있으면 즉시 더미 발행
     private void publishMissingDummy(TopicInfo info) {
-        String key = info.getPlace() + "|" + info.getPosition();
+        String key = info.getPlace() + "|" + info.getPosition() + "|" + info.getDeviceId();
         Set<String> required = "env".equals(info.getType())
                 ? requiredEnvElements
                 : requiredDeviceElements;
         Map<String, Set<String>> receivedMap = "env".equals(info.getType())
                 ? receivedEnv
                 : receivedDevice;
-
         Set<String> receivedSet = receivedMap.getOrDefault(key, Collections.emptySet());
-        for (String elem : required) {
-            if (!receivedSet.contains(elem)) {
-                dummyPublisher.publishDummyElement(
-                        info.getPlace(),
-                        info.getPosition(),
-                        info.getType(),
-                        gateId,
-                        elem
-                );
 
-                // 중복 방지
-                receivedMap.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet())
-                        .add(elem);
-            }
-        }
+        List<String> missing = required.stream()
+                .filter(elem -> !receivedSet.contains(elem))
+                .toList();
+
+        if (missing.isEmpty()) return;
+
+        dummyPublisher.publishDummyElements(
+                info.getPlace(),
+                info.getPosition(),
+                info.getType(),
+                gateId,
+                missing
+        );
+
+        receivedSet.addAll(missing);
     }
 
     private long registerGateway() {

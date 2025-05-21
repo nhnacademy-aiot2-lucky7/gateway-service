@@ -175,35 +175,35 @@ public class DummyMqttClient {
         }
     }
 
-    public void publishDummyElement(
+    public void publishDummyElements(
             String place, String position, String type,
-            long gatewayId, String element
+            long gatewayId, List<String> elements
     ) {
-        try {
-            // 1) 새로운 deviceId 생성
-            String deviceId = generateDeviceId();
+        String deviceId = generateDeviceId();
 
-            // 2) 토픽 생성
-            String topic = String.format(
-                    "data/s/nhnacademy/b/gyeongnam_campus"
-                            + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
-                    place, position, type, deviceId, gatewayId, element
-            );
+        for (String elem : elements) {
+            try {
 
-            // 3) 페이로드 생성(랜덤값)
-            String payload = String.format(
-                    "{\"time\": %d, \"value\": %.2f}",
-                    System.currentTimeMillis(),
-                    RANDOM.nextDouble() * 100
-            );
+                String topic = String.format(
+                        "project-data/s/nhnacademy/b/gyeongnam_campus"
+                                + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
+                        place, position, type, deviceId, gatewayId, elem
+                );
+                String payload = String.format(
+                        "{\"time\": %d, \"value\": %.2f}",
+                        System.currentTimeMillis(),
+                        RANDOM.nextDouble() * 100
+                );
 
-            // 4) 발행
-            MqttMessage msg = new MqttMessage(payload.getBytes());
-            msg.setQos(0);
-            client.publish(topic, msg);
-            log.info("[Dummy] 더미 메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
-        } catch (MqttException e) {
-            log.error("[Dummy] 더미 발행 실패 - place: {}, position: {}, element: {}", place, position, element, e);
+                MqttMessage msg = new MqttMessage(payload.getBytes());
+                msg.setQos(0);
+                client.publish(topic, msg);
+                log.info("[Dummy] 더미 메시지 발행 - 토픽: {}, 페이로드: {}", topic, payload);
+
+            } catch (MqttException e) {
+                log.error("[Dummy] 더미 발행 실패 - place: {}, position: {}, element: {}",
+                        place, position, elem, e);
+            }
         }
     }
 }
