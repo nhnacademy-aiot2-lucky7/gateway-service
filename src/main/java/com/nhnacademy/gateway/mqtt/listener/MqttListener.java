@@ -68,6 +68,7 @@ public class MqttListener {
         log.info("누락 데이터 검사 스케줄링 완료");
     }
 
+    @Scheduled(initialDelay = 120_000, fixedDelayString = "${app.detect.fixedDelay:2147483647}")
     private void detectMissing() {
         if (detectionDone) return;
         detectionDone = true;
