@@ -185,7 +185,7 @@ public class DummyMqttClient {
 
             // 2) 토픽 생성
             String topic = String.format(
-                    "project-data/s/nhnacademy/b/gyeongnam_campus"
+                    "data/s/nhnacademy/b/gyeongnam_campus"
                             + "/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
                     place, position, type, deviceId, gatewayId, element
             );
