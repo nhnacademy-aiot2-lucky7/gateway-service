@@ -7,9 +7,7 @@ import com.nhnacademy.gateway.gate.service.GateService;
 import com.nhnacademy.gateway.mqtt.client.DummyMqttClient;
 import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
 import com.nhnacademy.gateway.user.common.UserContextHolder;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -19,10 +17,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -118,7 +113,7 @@ public class MqttListener {
         Map<String, Set<String>> receivedMap = "env".equals(info.getType())
                 ? receivedEnv
                 : receivedDevice;
-        Set<String> receivedSet = receivedMap.getOrDefault(key, Collections.emptySet());
+        Set<String> receivedSet = receivedMap.computeIfAbsent(key, k -> new HashSet<>());
 
         List<String> missing = required.stream()
                 .filter(elem -> !receivedSet.contains(elem))
