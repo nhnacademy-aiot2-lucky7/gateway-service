@@ -31,6 +31,7 @@ public class ModbusMqttPublisher {
             publishMetric(result, "voltage", result.getVoltage());
             publishMetric(result, "current", result.getCurrent());
             publishMetric(result, "power", result.getPower());
+            publishMetric(result, "energy", result.getEnergy());
         }
     }
 

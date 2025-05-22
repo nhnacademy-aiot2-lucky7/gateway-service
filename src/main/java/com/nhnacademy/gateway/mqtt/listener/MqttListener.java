@@ -36,7 +36,7 @@ public class MqttListener {
     private static final Set<String> requiredEnvElements =
             Set.of("temperature", "humidity", "dust", "smoke");
     private static final Set<String> requiredDeviceElements =
-            Set.of("vibration", "noise", "voltage", "current", "power", "energy");
+            Set.of("vibration", "noise", "voltage", "current", "power");
 
     // 위치별로 수신된 env 요소를 기록
     private final Map<String, Set<String>> receivedEnv = new ConcurrentHashMap<>();

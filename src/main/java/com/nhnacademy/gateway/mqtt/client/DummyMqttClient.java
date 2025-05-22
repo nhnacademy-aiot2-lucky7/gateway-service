@@ -156,7 +156,7 @@ public class DummyMqttClient {
             case "voltage" -> this::generateVoltageData;
             case "current" -> this::generateCurrentData;
             case "power" -> this::generatePowerData;
-            case "pdu_energy" -> this::generateEnergyData;
+            case "energy" -> this::generateEnergyData;
             default -> () -> "{}";
         };
     }
