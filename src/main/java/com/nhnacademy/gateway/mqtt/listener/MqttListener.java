@@ -230,16 +230,43 @@ public class MqttListener {
     }
 
     private String buildNewTopic(TopicInfo info, long gatewayId) {
-        return String.format(
-                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
-                info.getPlace(),
-                info.getPosition(),
-                info.getType(),
-                info.getDeviceId(),
-                gatewayId,
-                info.getElement()
-        );
+        String position = info.getPosition();
+
+        if (position != null && position.startsWith("장비")) {
+            // "장비" 뒤에 오는 숫자 추출 (ex: "장비1" -> 1)
+            String portNumberStr = position.substring(2); // "장비" 두 글자 뒤부터
+            int portNumber = 0;
+            try {
+                portNumber = Integer.parseInt(portNumberStr);
+            } catch (NumberFormatException e) {
+                log.warn("포트 번호 변환 실패 - position: {}", position);
+                // 숫자 변환 실패 시 0으로 기본 처리하거나 예외 처리 가능
+            }
+
+            return String.format(
+                    "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/np/%d/g/%d/e/%s",
+                    info.getPlace(),
+                    info.getPosition(),
+                    info.getType(),
+                    info.getDeviceId(),
+                    portNumber,
+                    gatewayId,
+                    info.getElement()
+            );
+        } else {
+            // "장비"가 아니면 기존 형식 유지
+            return String.format(
+                    "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/%s/d/%s/g/%d/e/%s",
+                    info.getPlace(),
+                    info.getPosition(),
+                    info.getType(),
+                    info.getDeviceId(),
+                    gatewayId,
+                    info.getElement()
+            );
+        }
     }
+
 
     private String buildNewMessage(long timestamp, double value) {
         return String.format("{\"time\": %d, \"value\": %.2f}", timestamp, value);

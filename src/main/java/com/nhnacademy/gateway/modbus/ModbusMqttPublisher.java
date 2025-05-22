@@ -48,22 +48,6 @@ public class ModbusMqttPublisher {
         }
     }
 
-    private long registerGateway() {
-        UserContextHolder.setDepartmentId("master_modbus");
-
-        GateRequest gateRegisterRequest = new GateRequest(
-                "기존 데이터(MODBUS)", "MODBUS", "192.168.70.203", 502,
-                "nhnacademy 서버의 센서 수집 데이터(MODBUS)"
-        );
-
-        long id = gateService.createGate(gateRegisterRequest);
-        gateService.changeActivate(id);
-
-        log.info("게이트웨이 등록 완료 - ID: {}", id);
-
-        return id;
-    }
-
     private void publishMetric(ModbusResult result, String metric, double value) {
         try {
             String topic = buildTopic(result, metric);
@@ -84,8 +68,10 @@ public class ModbusMqttPublisher {
     }
 
     private String buildTopic(ModbusResult result, String metric) {
-        String key = result.getLocation() + ":" + result.getDeviceName();
-        String deviceId = deviceIdMap.computeIfAbsent(key, k -> UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+
+        String location = result.getLocation();
+
+        String deviceId = deviceIdMap.computeIfAbsent(location, loc -> UUID.randomUUID().toString().replace("-", "").substring(0, 16));
 
         return String.format(
                 "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/device/d/%s/g/%s/e/%s",
