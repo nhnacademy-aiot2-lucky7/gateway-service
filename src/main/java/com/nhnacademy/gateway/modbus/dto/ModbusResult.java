@@ -11,8 +11,11 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ModbusResult {
 
-    @JsonProperty("channel")
-    private String channel;
+    @JsonProperty("location")
+    private String location;
+
+    @JsonProperty("deviceName")
+    private String deviceName;
 
     @JsonProperty("current")
     private double current;

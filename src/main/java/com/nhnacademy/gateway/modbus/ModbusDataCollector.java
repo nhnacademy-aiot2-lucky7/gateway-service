@@ -20,25 +20,51 @@ public class ModbusDataCollector {
     private final ModbusMaster modbusMaster;
 
     // 채널 설정
-    private final Map<String, ChannelInfo> channelMap = Map.of(
-            "location1", new ChannelInfo(1, 100),
-            "location2", new ChannelInfo(1, 200),
-            "location3", new ChannelInfo(1, 300)
+    private final Map<String, ChannelInfo> channelMap = Map.ofEntries(
+            Map.entry("server_room|장비1", new ChannelInfo(1, 100)),
+            Map.entry("server_room|장비2", new ChannelInfo(1, 200)),
+            Map.entry("class_a|장비1", new ChannelInfo(1, 300)),
+            Map.entry("class_a|장비2", new ChannelInfo(1, 400)),
+            Map.entry("class_b|장비1", new ChannelInfo(1, 500)),
+            Map.entry("class_b|장비2", new ChannelInfo(1, 600)),
+            Map.entry("office|장비1", new ChannelInfo(1, 700)),
+            Map.entry("office|장비2", new ChannelInfo(1, 800)),
+            Map.entry("meeting_room|장비1", new ChannelInfo(1, 900)),
+            Map.entry("meeting_room|장비2", new ChannelInfo(1, 1000)),
+            Map.entry("hive|장비1", new ChannelInfo(1, 1100)),
+            Map.entry("hive|장비2", new ChannelInfo(1, 1200)),
+            Map.entry("pair_room|장비1", new ChannelInfo(1, 1300)),
+            Map.entry("pair_room|장비2", new ChannelInfo(1, 1400))
+//            Map.entry("사무실_전열1", new ChannelInfo(1, 1500)),
+//            Map.entry("사무실_전열2", new ChannelInfo(1, 1600)),
+//            Map.entry("사무실_복사기", new ChannelInfo(1, 1700)),
+//            Map.entry("빌트인_전열", new ChannelInfo(1, 1800)),
+//            Map.entry("사무실_전열3", new ChannelInfo(1, 1900)),
+//            Map.entry("정수기", new ChannelInfo(1, 2000)),
+//            Map.entry("하이브_전열", new ChannelInfo(1, 2100)),
+//            Map.entry("바텐_전열", new ChannelInfo(1, 2200)),
+//            Map.entry("S_P", new ChannelInfo(1, 2300)),
+//            Map.entry("공조기", new ChannelInfo(1, 2400))
     );
 
     // 전력/전류/전압 필드 정의 (공통)
     private static final List<ModbusField> COMMON_FIELDS = List.of(
-            new ModbusField("power", 4, 5, 0.01),
+            new ModbusField("power", 4, 5, 1),
             new ModbusField("current", 2, 3, 0.01),
-            new ModbusField("voltage", 16, 17, 0.1)
+            new ModbusField("voltage", 16, 17, 0.01)
     );
 
     public List<ModbusResult> collectAllChannelData() {
         List<ModbusResult> results = new ArrayList<>();
 
         for (Map.Entry<String, ChannelInfo> entry : channelMap.entrySet()) {
-            String location = entry.getKey();
+            String key = entry.getKey();  // e.g., "office|장비1"
             ChannelInfo info = entry.getValue();
+
+            // 파싱
+            String[] tokens = key.split("\\|", 2);
+            String location = tokens[0];            // 공간
+            String deviceName = tokens.length > 1 ? tokens[1] : "unknown";  // 위치
 
             try {
                 Map<String, Double> values = new HashMap<>();
@@ -49,6 +75,7 @@ public class ModbusDataCollector {
 
                 results.add(new ModbusResult(
                         location,
+                        deviceName,
                         values.get("current"),
                         values.get("voltage"),
                         values.get("power"),
@@ -56,7 +83,7 @@ public class ModbusDataCollector {
                 ));
 
             } catch (Exception e) {
-                log.error("Modbus 읽기 실패 - 채널: {}, slaveId: {}, baseAddress: {}", location, info.slaveId, info.baseAddress, e);
+                log.error("Modbus 읽기 실패 - 채널: {}, slaveId: {}, baseAddress: {}", key, info.slaveId, info.baseAddress, e);
                 throw new ModbusReadException();
             }
         }
