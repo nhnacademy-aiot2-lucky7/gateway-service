@@ -21,9 +21,9 @@ public class ModbusDataCollector {
 
     // 채널 설정
     private final Map<String, ChannelInfo> channelMap = Map.of(
-            "location1", new ChannelInfo(1, 600),
-            "location2", new ChannelInfo(1, 700),
-            "location3", new ChannelInfo(2, 600)
+            "location1", new ChannelInfo(1, 100),
+            "location2", new ChannelInfo(1, 200),
+            "location3", new ChannelInfo(1, 300)
     );
 
     // 전력/전류/전압 필드 정의 (공통)
