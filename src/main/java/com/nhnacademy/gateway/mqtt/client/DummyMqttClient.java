@@ -48,13 +48,16 @@ public class DummyMqttClient {
             }
             log.info("Dummy MQTT 클라이언트 실행, 브로커: {}", client.getServerURI());
 
+            UUID pduDeviceId1 = UUID.randomUUID(); // 장비1~5용 PDU ID
+            UUID pduDeviceId2 = UUID.randomUUID(); // 장비6~10용 PDU ID
+
             for (Map.Entry<String, List<String>> entry : SPACE_POSITIONS.entrySet()) {
                 String place = entry.getKey();
                 List<String> positions = entry.getValue();
 
                 for (String position : positions) {
                     if (position.startsWith("위치")) {
-                        // 온습도는 하나의 센서로 측정
+                        // 온습도 센서 (같은 ID)
                         String envDeviceId1 = generateDeviceId();
                         publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId1, position, "temperature")), getPayloadSupplierForElement("temperature")));
                         publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "env", envDeviceId1, position, "humidity")), getPayloadSupplierForElement("humidity")));
@@ -76,11 +79,21 @@ public class DummyMqttClient {
                         String noiseDeviceId = generateDeviceId();
                         publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "device", noiseDeviceId, position, "noise")), getPayloadSupplierForElement("noise")));
 
-                        // PDU 센서 (server_room에 한정)
+                        // PDU 센서 (server_room 한정)
                         if ("server_room".equals(place)) {
-                            String pduDeviceId = generateDeviceId();
+                            UUID pduDeviceId;
+
+                            // "장비" 뒤 숫자 추출
+                            try {
+                                int positionNumber = Integer.parseInt(position.substring(2));
+                                pduDeviceId = (positionNumber <= 5) ? pduDeviceId1 : pduDeviceId2;
+                            } catch (NumberFormatException e) {
+                                log.warn("position에서 숫자 추출 실패: {}", position);
+                                continue; // PDU 생성을 건너뜀
+                            }
+
                             for (String element : List.of("voltage", "current", "power", "energy")) {
-                                TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
+                                TopicInfo info = new TopicInfo(place, "device", pduDeviceId.toString(), position, element);
                                 publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
                             }
                         }
@@ -93,6 +106,7 @@ public class DummyMqttClient {
             throw new MqttConnectionException("Mqtt 연결 실패");
         }
     }
+
 
     // 일정 간격으로 모든 토픽에 메시지 발행
     @Scheduled(fixedRate = PUBLISH_INTERVAL_MS)
