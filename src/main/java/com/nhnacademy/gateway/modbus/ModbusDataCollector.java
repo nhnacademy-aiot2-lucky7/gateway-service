@@ -19,29 +19,44 @@ public class ModbusDataCollector {
 
     private final ModbusMaster modbusMaster;
 
-    // 채널 설정: 예시 (실제 환경에 맞게)
+    // 채널 설정
     private final Map<String, ChannelInfo> channelMap = Map.of(
             "location1", new ChannelInfo(1, 600),
             "location2", new ChannelInfo(1, 700),
             "location3", new ChannelInfo(2, 600)
     );
 
+    // 전력/전류/전압 필드 정의 (공통)
+    private static final List<ModbusField> COMMON_FIELDS = List.of(
+            new ModbusField("power", 4, 5, 0.01),
+            new ModbusField("current", 2, 3, 0.01),
+            new ModbusField("voltage", 16, 17, 0.1)
+    );
+
     public List<ModbusResult> collectAllChannelData() {
         List<ModbusResult> results = new ArrayList<>();
 
         for (Map.Entry<String, ChannelInfo> entry : channelMap.entrySet()) {
-            String channel = entry.getKey();
+            String location = entry.getKey();
             ChannelInfo info = entry.getValue();
-            try {
-                double current = readRegister(info, 2, 3);
-                double voltage = readRegister(info, 16, 17);
-                double power = readRegister(info, 4, 5);
 
-                results.add(new ModbusResult(channel, current, voltage, power, Instant.now().toEpochMilli()));
+            try {
+                Map<String, Double> values = new HashMap<>();
+                for (ModbusField field : COMMON_FIELDS) {
+                    double value = readField(info, field);
+                    values.put(field.name(), value);
+                }
+
+                results.add(new ModbusResult(
+                        location,
+                        values.get("current"),
+                        values.get("voltage"),
+                        values.get("power"),
+                        Instant.now().toEpochMilli()
+                ));
 
             } catch (Exception e) {
-                String errMsg = String.format("Modbus 읽기 실패 - 채널: %s, slaveId: %d, baseAddress: %d", channel, info.slaveId, info.baseAddress);
-                log.error(errMsg, e);
+                log.error("Modbus 읽기 실패 - 채널: {}, slaveId: {}, baseAddress: {}", location, info.slaveId, info.baseAddress, e);
                 throw new ModbusReadException();
             }
         }
@@ -49,11 +64,19 @@ public class ModbusDataCollector {
         return results;
     }
 
-    private double readRegister(ChannelInfo info, int highOffset, int lowOffset) throws Exception {
-        int high = modbusMaster.getValue(BaseLocator.holdingRegister(info.slaveId, info.baseAddress + highOffset, DataType.TWO_BYTE_INT_UNSIGNED)).intValue();
-        int low = modbusMaster.getValue(BaseLocator.holdingRegister(info.slaveId, info.baseAddress + lowOffset, DataType.TWO_BYTE_INT_UNSIGNED)).intValue();
-        long raw = ((long) high << 16) | low;
-        return raw / 100.0;
+    private double readField(ChannelInfo info, ModbusField field) throws Exception {
+        int high = modbusMaster.getValue(BaseLocator.holdingRegister(
+                info.slaveId,
+                info.baseAddress + field.highOffset(),
+                DataType.TWO_BYTE_INT_UNSIGNED)).intValue();
+
+        int low = modbusMaster.getValue(BaseLocator.holdingRegister(
+                info.slaveId,
+                info.baseAddress + field.lowOffset(),
+                DataType.TWO_BYTE_INT_UNSIGNED)).intValue();
+
+        long raw = ((long) high << 16) | (low & 0xFFFFL);
+        return raw * field.scale();
     }
 
     private static class ChannelInfo {
@@ -63,6 +86,36 @@ public class ModbusDataCollector {
         ChannelInfo(int slaveId, int baseAddress) {
             this.slaveId = slaveId;
             this.baseAddress = baseAddress;
+        }
+    }
+
+    private static class ModbusField {
+        private final String name;
+        private final int highOffset;
+        private final int lowOffset;
+        private final double scale;
+
+        public ModbusField(String name, int highOffset, int lowOffset, double scale) {
+            this.name = name;
+            this.highOffset = highOffset;
+            this.lowOffset = lowOffset;
+            this.scale = scale;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public int highOffset() {
+            return highOffset;
+        }
+
+        public int lowOffset() {
+            return lowOffset;
+        }
+
+        public double scale() {
+            return scale;
         }
     }
 }
