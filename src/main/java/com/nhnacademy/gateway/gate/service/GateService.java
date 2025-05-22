@@ -12,6 +12,8 @@ public interface GateService {
 
     GateResponse getGate(Long gateNo);
 
+    GateResponse getGateByAddress(String ip, int port);
+
     List<GateSummaryResponse> getGateList();
 
     boolean updateGate(Long gateNo, GateRequest gateUpdateRequest);

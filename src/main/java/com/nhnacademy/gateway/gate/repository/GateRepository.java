@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GateRepository extends JpaRepository<Gate, Long>, CustomGateRepository {
     boolean existsByBrokerIpAndPort(String brokerIp, Integer port);
+
+    Gate findByBrokerIpAndPort(String brokerIp, Integer port);
 }

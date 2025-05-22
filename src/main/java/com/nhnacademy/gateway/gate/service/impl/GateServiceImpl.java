@@ -71,6 +71,19 @@ public class GateServiceImpl implements GateService {
         return gateMapper(gate);
     }
 
+    @Override
+    public GateResponse getGateByAddress(String ip, int port) {
+        log.debug("게이트웨이 조회 시작! 게이트웨이 아이디 : {} : {}", ip, port);
+
+        if (!gateRepository.existsByBrokerIpAndPort(ip, port)) {
+            throw new ConflictException("존재하지 않는 주소");
+        }
+
+        Gate gate = gateRepository.findByBrokerIpAndPort(ip, port);
+
+        return gateMapper(gate);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<GateSummaryResponse> getGateList() {

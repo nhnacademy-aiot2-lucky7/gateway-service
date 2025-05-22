@@ -27,6 +27,8 @@ public class ModbusMqttPublisher {
 
     private final GateService gateService;
 
+    private static final String BROKER_IP = "115.94.72.197";
+    private static final int PORT = 1883;
     private long gateId;
 
     public ModbusMqttPublisher(@Qualifier("modbusPublisherMqttClient") MqttClient mqttClient, GateService gateService) {
@@ -36,7 +38,7 @@ public class ModbusMqttPublisher {
 
     public void publish(List<ModbusResult> results) {
 
-        this.gateId = registerGateway();
+        this.gateId = gateService.getGateByAddress(BROKER_IP, PORT).getGateNo();
 
         for (ModbusResult result : results) {
             publishMetric(result, "voltage", result.getVoltage());
