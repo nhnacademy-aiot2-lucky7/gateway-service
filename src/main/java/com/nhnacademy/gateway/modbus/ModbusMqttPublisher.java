@@ -71,7 +71,7 @@ public class ModbusMqttPublisher {
             mqttMessage.setQos(1);
 
             mqttClient.publish(topic, mqttMessage);
-            log.info("Published to topic: {}, payload: {}", topic, message);
+            log.debug("토픽 발행 : {}, payload: {}", topic, message);
 
         } catch (Exception e) {
             String errMsg = String.format("MQTT publish 실패 - metric: %s, location: %s, device: %s",

@@ -36,7 +36,7 @@ public class MqttListener {
     private static final Set<String> requiredEnvElements =
             Set.of("temperature", "humidity", "dust", "smoke");
     private static final Set<String> requiredDeviceElements =
-            Set.of("vibration", "noise", "voltage", "current", "power");
+            Set.of("vibration", "noise");
 
     // 위치별로 수신된 env 요소를 기록
     private final Map<String, Set<String>> receivedEnv = new ConcurrentHashMap<>();
@@ -207,8 +207,8 @@ public class MqttListener {
 
     private String inferTypeFromElement(String element) {
         // 측정 항목 이름에 따라 분류
-        Set<String> envElements = Set.of("temperature", "humidity", "vibration", "noise");
-        Set<String> deviceElements = Set.of("power", "current", "voltage", "energy");
+        Set<String> envElements = Set.of("temperature", "humidity", "dust", "smoke");
+        Set<String> deviceElements = Set.of("vibration", "noise", "power", "current", "voltage", "energy");
 
         if (envElements.contains(element.toLowerCase())) {
             return "env";
