@@ -208,7 +208,7 @@ public class MqttListener {
     private String inferTypeFromElement(String element) {
         // 측정 항목 이름에 따라 분류
         Set<String> envElements = Set.of("temperature", "humidity", "co2", "noise");
-        Set<String> deviceElements = Set.of("power", "current", "voltage", "watt");
+        Set<String> deviceElements = Set.of("power", "current", "voltage", "energy");
 
         if (envElements.contains(element.toLowerCase())) {
             return "env";
