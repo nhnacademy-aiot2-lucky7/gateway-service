@@ -76,11 +76,13 @@ public class DummyMqttClient {
                         String noiseDeviceId = generateDeviceId();
                         publishTasks.add(new PublishTask(buildTopic(new TopicInfo(place, "device", noiseDeviceId, position, "noise")), getPayloadSupplierForElement("noise")));
 
-                        // PDU 센서 (voltage, current, power, energy는 하나의 장비로 측정)
-                        String pduDeviceId = generateDeviceId();
-                        for (String element : List.of("voltage", "current", "power", "energy")) {
-                            TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
-                            publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
+                        // PDU 센서 (server_room에 한정)
+                        if ("server_room".equals(place)) {
+                            String pduDeviceId = generateDeviceId();
+                            for (String element : List.of("voltage", "current", "power", "energy")) {
+                                TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
+                                publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
+                            }
                         }
                     }
                 }
