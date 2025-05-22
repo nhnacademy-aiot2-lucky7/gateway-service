@@ -1,7 +1,10 @@
 package com.nhnacademy.gateway.modbus;
 
 import com.nhnacademy.gateway.exception.MqttPublishException;
+import com.nhnacademy.gateway.gate.dto.GateRequest;
+import com.nhnacademy.gateway.gate.service.GateService;
 import com.nhnacademy.gateway.modbus.dto.ModbusResult;
+import com.nhnacademy.gateway.user.common.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -22,17 +25,41 @@ public class ModbusMqttPublisher {
 
     private final Map<String, String> deviceIdMap = new ConcurrentHashMap<>();
 
-    public ModbusMqttPublisher(@Qualifier("modbusPublisherMqttClient") MqttClient mqttClient) {
+    private final GateService gateService;
+
+    private long gateId;
+
+    public ModbusMqttPublisher(@Qualifier("modbusPublisherMqttClient") MqttClient mqttClient, GateService gateService) {
         this.mqttClient = mqttClient;
+        this.gateService = gateService;
     }
 
     public void publish(List<ModbusResult> results) {
+
+        this.gateId = registerGateway();
+
         for (ModbusResult result : results) {
             publishMetric(result, "voltage", result.getVoltage());
             publishMetric(result, "current", result.getCurrent());
             publishMetric(result, "power", result.getPower());
             publishMetric(result, "energy", result.getEnergy());
         }
+    }
+
+    private long registerGateway() {
+        UserContextHolder.setDepartmentId("master_modbus");
+
+        GateRequest gateRegisterRequest = new GateRequest(
+                "기존 데이터(MODBUS)", "MODBUS", "192.168.70.203", 502,
+                "nhnacademy 서버의 센서 수집 데이터(MODBUS)"
+        );
+
+        long id = gateService.createGate(gateRegisterRequest);
+        gateService.changeActivate(id);
+
+        log.info("게이트웨이 등록 완료 - ID: {}", id);
+
+        return id;
     }
 
     private void publishMetric(ModbusResult result, String metric, double value) {
@@ -59,10 +86,11 @@ public class ModbusMqttPublisher {
         String deviceId = deviceIdMap.computeIfAbsent(key, k -> UUID.randomUUID().toString().replace("-", "").substring(0, 16));
 
         return String.format(
-                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/device/d/%s/g/34/e/%s",
+                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/device/d/%s/g/%s/e/%s",
                 result.getLocation(),
                 result.getDeviceName(),
                 deviceId,
+                gateId,
                 metric
         );
     }

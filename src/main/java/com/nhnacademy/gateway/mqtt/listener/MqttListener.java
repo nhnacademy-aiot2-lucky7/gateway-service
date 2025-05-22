@@ -64,7 +64,7 @@ public class MqttListener {
         log.info("토픽 패턴 구독 완료: data/#");
 
         collecting = true;
-        scheduler.schedule(this::detectMissing, 2, TimeUnit.MINUTES);
+        scheduler.schedule(this::detectMissing, 5, TimeUnit.MINUTES);
     }
 
     private void handleMessage(ObjectMapper objectMapper, String topic, MqttMessage message) {
@@ -155,11 +155,11 @@ public class MqttListener {
     }
 
     private long registerGateway() {
-        UserContextHolder.setDepartmentId("master");
+        UserContextHolder.setDepartmentId("master_mqtt");
 
         GateRequest gateRegisterRequest = new GateRequest(
-                "기존 데이터", "MQTT", "115.94.72.197", 1883,
-                "nhnacademy 서버의 센서 수집 데이터"
+                "기존 데이터(MQTT)", "MQTT", "115.94.72.197", 1883,
+                "nhnacademy 서버의 센서 수집 데이터(MQTT)"
         );
 
         long id = gateService.createGate(gateRegisterRequest);
