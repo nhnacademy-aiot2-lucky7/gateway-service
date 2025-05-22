@@ -41,6 +41,16 @@ public class MqttConfig {
         return client;
     }
 
+    @Bean(name = "modbusPublisherMqttClient")
+    public MqttClient modbusPublisherMqttClient() throws MqttException {
+        MqttClient client = new MqttClient(brokerUrl, "MODBUS_PUB_CLIENT", new MemoryPersistence());
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setCleanSession(true);
+        options.setMaxInflight(100);
+        client.connect(options);
+        return client;
+    }
+
     @PreDestroy
     public void cleanup() {
         if (client != null && client.isConnected()) {
