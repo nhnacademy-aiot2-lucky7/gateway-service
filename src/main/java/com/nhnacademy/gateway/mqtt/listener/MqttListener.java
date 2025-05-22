@@ -15,7 +15,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -37,7 +36,7 @@ public class MqttListener {
     private static final Set<String> requiredEnvElements =
             Set.of("temperature", "humidity", "dust", "smoke");
     private static final Set<String> requiredDeviceElements =
-            Set.of("vibration", "noise", "pdu_voltage", "pdu_current", "pdu_power", "pdu_energy");
+            Set.of("vibration", "noise", "voltage", "current", "power", "energy");
 
     // 위치별로 수신된 env 요소를 기록
     private final Map<String, Set<String>> receivedEnv = new ConcurrentHashMap<>();

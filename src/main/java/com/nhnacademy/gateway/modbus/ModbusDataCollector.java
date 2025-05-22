@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -21,30 +22,19 @@ public class ModbusDataCollector {
 
     // 채널 설정
     private final Map<String, ChannelInfo> channelMap = Map.ofEntries(
-            Map.entry("server_room|장비1", new ChannelInfo(1, 100)),
-            Map.entry("server_room|장비2", new ChannelInfo(1, 200)),
+
             Map.entry("class_a|장비1", new ChannelInfo(1, 300)),
-            Map.entry("class_a|장비2", new ChannelInfo(1, 400)),
-            Map.entry("class_b|장비1", new ChannelInfo(1, 500)),
-            Map.entry("class_b|장비2", new ChannelInfo(1, 600)),
-            Map.entry("office|장비1", new ChannelInfo(1, 700)),
-            Map.entry("office|장비2", new ChannelInfo(1, 800)),
-            Map.entry("meeting_room|장비1", new ChannelInfo(1, 900)),
-            Map.entry("meeting_room|장비2", new ChannelInfo(1, 1000)),
-            Map.entry("hive|장비1", new ChannelInfo(1, 1100)),
-            Map.entry("hive|장비2", new ChannelInfo(1, 1200)),
-            Map.entry("pair_room|장비1", new ChannelInfo(1, 1300)),
-            Map.entry("pair_room|장비2", new ChannelInfo(1, 1400))
-//            Map.entry("사무실_전열1", new ChannelInfo(1, 1500)),
-//            Map.entry("사무실_전열2", new ChannelInfo(1, 1600)),
-//            Map.entry("사무실_복사기", new ChannelInfo(1, 1700)),
-//            Map.entry("빌트인_전열", new ChannelInfo(1, 1800)),
-//            Map.entry("사무실_전열3", new ChannelInfo(1, 1900)),
-//            Map.entry("정수기", new ChannelInfo(1, 2000)),
-//            Map.entry("하이브_전열", new ChannelInfo(1, 2100)),
-//            Map.entry("바텐_전열", new ChannelInfo(1, 2200)),
-//            Map.entry("S_P", new ChannelInfo(1, 2300)),
-//            Map.entry("공조기", new ChannelInfo(1, 2400))
+            Map.entry("class_a|장비2", new ChannelInfo(1, 500)),
+            Map.entry("class_b|장비1", new ChannelInfo(1, 600)),
+            Map.entry("class_b|장비2", new ChannelInfo(1, 700)),
+            Map.entry("office|장비1", new ChannelInfo(1, 800)),
+            Map.entry("office|장비2", new ChannelInfo(1, 900)),
+            Map.entry("meeting_room|장비1", new ChannelInfo(1, 1000)),
+            Map.entry("meeting_room|장비2", new ChannelInfo(1, 1100)),
+            Map.entry("hive|장비1", new ChannelInfo(1, 1300)),
+            Map.entry("hive|장비2", new ChannelInfo(1, 1400)),
+            Map.entry("pair_room|장비1", new ChannelInfo(1, 1500)),
+            Map.entry("pair_room|장비2", new ChannelInfo(1, 1600))
     );
 
     // 전력/전류/전압 필드 정의 (공통)
@@ -54,17 +44,23 @@ public class ModbusDataCollector {
             new ModbusField("voltage", 16, 17, 0.01)
     );
 
+    // 이전 전력값 저장용 Map (key = location|deviceName)
+    private final Map<String, Double> previousPowerMap = new HashMap<>();
+
+    // 이전 측정 시각 저장용 Map
+    private final Map<String, Long> previousTimeMap = new HashMap<>();
+
     public List<ModbusResult> collectAllChannelData() {
         List<ModbusResult> results = new ArrayList<>();
+        long now = Instant.now().toEpochMilli();
 
         for (Map.Entry<String, ChannelInfo> entry : channelMap.entrySet()) {
             String key = entry.getKey();  // e.g., "office|장비1"
             ChannelInfo info = entry.getValue();
 
-            // 파싱
             String[] tokens = key.split("\\|", 2);
-            String location = tokens[0];            // 공간
-            String deviceName = tokens.length > 1 ? tokens[1] : "unknown";  // 위치
+            String location = tokens[0];
+            String deviceName = tokens.length > 1 ? tokens[1] : "unknown";
 
             try {
                 Map<String, Double> values = new HashMap<>();
@@ -73,13 +69,30 @@ public class ModbusDataCollector {
                     values.put(field.name(), value);
                 }
 
+                // 이전 전력과 시간 정보 조회
+                Double prevPower = previousPowerMap.get(key);
+                Long prevTime = previousTimeMap.get(key);
+
+                // 이번에 계산할 energy (와트시 단위)
+                double energy = 0.0;
+
+                if (prevPower != null && prevTime != null) {
+                    double deltaTimeHours = (now - prevTime) / 3600000.0; // 밀리초 -> 시간 변환
+                    energy = prevPower * deltaTimeHours; // Wh 단위 적분 (사다리꼴 공식은 생략하고 간단화)
+                }
+
+                // 이번 전력 및 시간 저장 (다음 계산을 위해)
+                previousPowerMap.put(key, values.get("power"));
+                previousTimeMap.put(key, now);
+
                 results.add(new ModbusResult(
                         location,
                         deviceName,
                         values.get("current"),
                         values.get("voltage"),
                         values.get("power"),
-                        Instant.now().toEpochMilli()
+                        energy,
+                        now
                 ));
 
             } catch (Exception e) {
@@ -87,7 +100,6 @@ public class ModbusDataCollector {
                 throw new ModbusReadException();
             }
         }
-
         return results;
     }
 

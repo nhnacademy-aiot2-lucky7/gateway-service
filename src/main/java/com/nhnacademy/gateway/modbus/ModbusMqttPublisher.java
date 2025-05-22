@@ -55,7 +55,7 @@ public class ModbusMqttPublisher {
 
     private String buildTopic(ModbusResult result, String metric) {
         String key = result.getLocation() + ":" + result.getDeviceName();
-        String deviceId = deviceIdMap.computeIfAbsent(key, k -> UUID.randomUUID().toString());
+        String deviceId = deviceIdMap.computeIfAbsent(key, k -> UUID.randomUUID().toString().replace("-", "").substring(0, 16));
 
         return String.format(
                 "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/device/d/%s/g/34/e/%s",

@@ -26,6 +26,9 @@ public class ModbusResult {
     @JsonProperty("power")
     private double power;
 
+    @JsonProperty("energy")
+    private double energy;
+
     @JsonProperty("timestamp")
     private long timestamp;
 }

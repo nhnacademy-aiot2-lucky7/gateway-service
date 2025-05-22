@@ -29,7 +29,7 @@ public class DummyMqttClient {
             "office", List.of("위치1", "위치2", "장비1", "장비2"),
             "class_a", List.of("위치1", "위치2", "장비1", "장비2"),
             "class_b", List.of("위치1", "위치2", "장비1", "장비2"),
-            "server_room", List.of("위치1", "위치2", "위치3", "장비1", "장비2"),
+            "server_room", List.of("위치1", "위치2", "위치3", "장비1", "장비2", "장비3", "장비4", "장비5", "장비6", "장비7", "장비8", "장비9", "장비10"),
             "hive", List.of("위치1", "위치2", "장비1", "장비2"),
             "pair_room", List.of("위치1", "위치2", "장비1", "장비2"),
             "meeting_room", List.of("위치1", "위치2", "장비1", "장비2"),
@@ -78,7 +78,7 @@ public class DummyMqttClient {
 
                         // PDU 센서 (voltage, current, power, energy는 하나의 장비로 측정)
                         String pduDeviceId = generateDeviceId();
-                        for (String element : List.of("pdu_voltage", "pdu_current", "pdu_power", "pdu_energy")) {
+                        for (String element : List.of("voltage", "current", "power", "energy")) {
                             TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
                             publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
                         }
@@ -153,9 +153,9 @@ public class DummyMqttClient {
             case "smoke" -> this::generateSmokeData;
             case "vibration" -> this::generateVibrationData;
             case "noise" -> this::generateNoiseData;
-            case "pdu_voltage" -> this::generateVoltageData;
-            case "pdu_current" -> this::generateCurrentData;
-            case "pdu_power" -> this::generatePowerData;
+            case "voltage" -> this::generateVoltageData;
+            case "current" -> this::generateCurrentData;
+            case "power" -> this::generatePowerData;
             case "pdu_energy" -> this::generateEnergyData;
             default -> () -> "{}";
         };
@@ -169,9 +169,16 @@ public class DummyMqttClient {
     private String generateVibrationData() { return generateSensorData(0, 10); }
     private String generateNoiseData() { return generateSensorData(30, 90); }
     private String generateVoltageData() { return generateSensorData(210, 240); }
-    private String generateCurrentData() { return generateSensorData(0, 20); }
-    private String generatePowerData() { return generateSensorData(0, 5000); }
-    private String generateEnergyData() { return generateSensorData(0, 100000); }
+    private String generateCurrentData() { return generateSensorData(0, 10); }  // 최대 10A
+    private String generatePowerData() { return generateSensorData(0, 2000); }   // 최대 2kW
+
+    private long energyCounter = 0;
+    private String generateEnergyData() {
+        // 1분마다 0~100 Wh 정도 누적 증가 가정
+        energyCounter += RANDOM.nextInt(100);
+        long time = System.currentTimeMillis();
+        return String.format("{\"time\": %d, \"value\": %d}", time, energyCounter);
+    }
 
     String generateSensorData(double min, double max) {
         long time = System.currentTimeMillis();
