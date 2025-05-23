@@ -78,15 +78,7 @@ public class MqttListener {
                 long timestamp = node.has("time") ? node.get("time").asLong() : System.currentTimeMillis();
 
                 TopicInfo topicInfo = parseTopicParts(topic);
-
-                String element = topicInfo.getElement();  // getter를 사용한다고 가정
-
-                if (element != null && (element.equals("voltage") || element.equals("current") ||
-                        element.equals("power") || element.equals("energy"))) {
-                    log.info("[DEBUG_LOG] topicInfo 확인 - place: {}, type: {}, deviceId: {}, position: {}, element: {}",
-                            topicInfo.getPlace(), topicInfo.getType(), topicInfo.getDeviceId(),
-                            topicInfo.getPosition(), topicInfo.getElement());
-                }
+                log.info("[디버깅] topicInfo 파싱 결과: {}", topicInfo);
 
                 if (topicInfo == null) {
                     log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
@@ -96,6 +88,8 @@ public class MqttListener {
 
                 String newTopic = buildNewTopic(topicInfo, gateId);
                 String messageContent = buildNewMessage(timestamp, value);
+                log.info("[디버깅] buildNewTopic 결과: {}", newTopic);
+                log.info("[디버깅] publishMessage 호출: 토픽={}, 페이로드={}", newTopic, messageContent);
 
                 publishMessage(newTopic, messageContent);
 
@@ -286,10 +280,14 @@ public class MqttListener {
     }
 
     private void publishMessage(String topic, String payload) throws MqttException {
-        MqttMessage message = new MqttMessage(payload.getBytes());
-        message.setQos(1);
-        mqttClient.publish(topic, message);
-        log.debug("메시지 발행 완료 - 토픽: {}, 페이로드: {}", topic, payload);
+        try {
+            MqttMessage message = new MqttMessage(payload.getBytes());
+            message.setQos(1);
+            mqttClient.publish(topic, message);
+            log.debug("메시지 발행 완료 - 토픽: {}, 페이로드: {}", topic, payload);
+        } catch (Exception e) {
+            log.error("메시지 처리 실패 - 토픽: {}, 에러: {}", topic, e.getMessage(), e);
+        }
     }
 
     @PreDestroy
