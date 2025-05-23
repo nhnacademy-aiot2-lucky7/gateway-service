@@ -77,9 +77,21 @@ public class MqttListener {
                 double value = node.get("value").asDouble();
                 long timestamp = node.has("time") ? node.get("time").asLong() : System.currentTimeMillis();
 
+                // 임의추가
+                log.info("파싱 완료 - value: {}, timestamp: {}", value, timestamp);
+
                 TopicInfo topicInfo = parseTopicParts(topic);
                 if (topicInfo == null) {
                     log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
+
+                    String element = topicInfo.getElement();  // getter를 사용한다고 가정
+
+                    if (element != null && (element.equals("voltage") || element.equals("current") ||
+                            element.equals("power") || element.equals("energy"))) {
+                        log.info("[DEBUG_LOG] topicInfo 확인 - place: {}, type: {}, deviceId: {}, position: {}, element: {}",
+                                topicInfo.getPlace(), topicInfo.getType(), topicInfo.getDeviceId(),
+                                topicInfo.getPosition(), topicInfo.getElement());
+                    }
 
                     return;
                 }
