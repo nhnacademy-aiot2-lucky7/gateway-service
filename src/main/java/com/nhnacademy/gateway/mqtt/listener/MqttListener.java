@@ -2,7 +2,9 @@ package com.nhnacademy.gateway.mqtt.listener;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.gateway.gate.domain.Gate;
 import com.nhnacademy.gateway.gate.dto.GateRequest;
+import com.nhnacademy.gateway.gate.repository.GateRepository;
 import com.nhnacademy.gateway.gate.service.GateService;
 import com.nhnacademy.gateway.mqtt.client.DummyMqttClient;
 import com.nhnacademy.gateway.mqtt.dto.TopicInfo;
@@ -13,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -23,9 +26,10 @@ import java.util.concurrent.*;
 @Component
 @Slf4j
 public class MqttListener {
+
     private final MqttClient mqttClient;
     private final DummyMqttClient dummyPublisher;
-    private final GateService gateService;
+    private final GateRepository gateRepository;
     private final ExecutorService executor;
 
     private long gateId;
@@ -42,14 +46,17 @@ public class MqttListener {
     private final Map<String, Set<String>> receivedEnv = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> receivedDevice = new ConcurrentHashMap<>();
 
+    @Value("${academy.broker.ip}")
+    private String academyBrokerIp;
+
     public MqttListener(
             @Qualifier("listenerMqttClient") MqttClient mqttClient,
             DummyMqttClient dummyPublisher,
-            GateService gateService
+            GateRepository gateRepository
     ) {
         this.mqttClient = mqttClient;
         this.dummyPublisher = dummyPublisher;
-        this.gateService = gateService;
+        this.gateRepository = gateRepository;
         this.executor = Executors.newFixedThreadPool(4);
     }
 
@@ -157,19 +164,30 @@ public class MqttListener {
     }
 
     private long registerGateway() {
-        UserContextHolder.setDepartmentId("master_mqtt");
+        int port = 1883;
 
-        GateRequest gateRegisterRequest = new GateRequest(
-                "기존 데이터(MQTT)", "MQTT", "115.94.72.197", 1883,
-                "nhnacademy 서버의 센서 수집 데이터(MQTT)"
-        );
+        if (!gateRepository.existsByBrokerIpAndPort(academyBrokerIp, port)) {
+            Gate gate = Gate.ofNewGate(
+                    "기존 데이터(MQTT)",
+                    "MQTT",
+                    academyBrokerIp,
+                    port,
+                    "master_mqtt",
+                    "nhnacademy 서버의 센서 수집 데이터(MQTT)"
+            );
 
-        long id = gateService.createGate(gateRegisterRequest);
-        gateService.changeActivate(id);
+            Gate savedGate = gateRepository.save(gate);
 
-        log.info("게이트웨이 등록 완료 - ID: {}", id);
+            log.info("게이트웨이 등록 완료 - ID: {}", savedGate.getGateNo());
 
-        return id;
+            return savedGate.getGateNo();
+        } else {
+            Gate gate = gateRepository.findByBrokerIpAndPort(academyBrokerIp, port);
+
+            log.info("이미 존재하는 게이트웨이 연결 - ID: {}", gate.getGateNo());
+
+            return gate.getGateNo();
+        }
     }
 
     private TopicInfo parseTopicParts(String topic) {
