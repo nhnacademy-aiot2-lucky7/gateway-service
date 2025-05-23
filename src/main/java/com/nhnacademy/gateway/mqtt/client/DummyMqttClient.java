@@ -48,8 +48,8 @@ public class DummyMqttClient {
             }
             log.info("Dummy MQTT 클라이언트 실행, 브로커: {}", client.getServerURI());
 
-            UUID pduDeviceId1 = UUID.randomUUID(); // 장비1~5용 PDU ID
-            UUID pduDeviceId2 = UUID.randomUUID(); // 장비6~10용 PDU ID
+            String pduDeviceId1 = UUID.randomUUID().toString().replace("-", "").substring(0, 16); // 장비1~5용 PDU ID
+            String pduDeviceId2 = UUID.randomUUID().toString().replace("-", "").substring(0, 16); // 장비6~10용 PDU ID
 
             for (Map.Entry<String, List<String>> entry : SPACE_POSITIONS.entrySet()) {
                 String place = entry.getKey();
@@ -81,7 +81,7 @@ public class DummyMqttClient {
 
                         // PDU 센서 (server_room 한정)
                         if ("server_room".equals(place)) {
-                            UUID pduDeviceId;
+                            String pduDeviceId;
 
                             // "장비" 뒤 숫자 추출
                             try {
@@ -93,7 +93,7 @@ public class DummyMqttClient {
                             }
 
                             for (String element : List.of("voltage", "current", "power", "energy")) {
-                                TopicInfo info = new TopicInfo(place, "device", pduDeviceId.toString(), position, element);
+                                TopicInfo info = new TopicInfo(place, "device", pduDeviceId, position, element);
                                 publishTasks.add(new PublishTask(buildTopic(info), getPayloadSupplierForElement(element)));
                             }
                         }
