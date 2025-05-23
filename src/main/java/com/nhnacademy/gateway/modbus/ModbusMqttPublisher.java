@@ -25,20 +25,11 @@ public class ModbusMqttPublisher {
 
     private final Map<String, String> deviceIdMap = new ConcurrentHashMap<>();
 
-    private final GateService gateService;
-
-    private static final String BROKER_IP = "115.94.72.197";
-    private static final int PORT = 1883;
-    private long gateId;
-
-    public ModbusMqttPublisher(@Qualifier("modbusPublisherMqttClient") MqttClient mqttClient, GateService gateService) {
+    public ModbusMqttPublisher(@Qualifier("modbusPublisherMqttClient") MqttClient mqttClient) {
         this.mqttClient = mqttClient;
-        this.gateService = gateService;
     }
 
     public void publish(List<ModbusResult> results) {
-
-        this.gateId = gateService.getGateByAddress(BROKER_IP, PORT).getGateNo();
 
         for (ModbusResult result : results) {
             publishMetric(result, "voltage", result.getVoltage());
@@ -74,11 +65,11 @@ public class ModbusMqttPublisher {
         String deviceId = deviceIdMap.computeIfAbsent(location, loc -> UUID.randomUUID().toString().replace("-", "").substring(0, 16));
 
         return String.format(
-                "project-data/s/nhnacademy/b/gyeongnam_campus/p/%s/n/%s/device/d/%s/g/%s/e/%s",
+                "data/s/nhnacademy/b/gyeongnam_campus/p/%s/%s/d/%s/n/%s/e/%s",
                 result.getLocation(),
-                result.getDeviceName(),
+                "device",
                 deviceId,
-                gateId,
+                result.getDeviceName(),
                 metric
         );
     }
