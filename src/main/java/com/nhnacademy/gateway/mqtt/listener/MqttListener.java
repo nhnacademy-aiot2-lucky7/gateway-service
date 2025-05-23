@@ -55,10 +55,11 @@ public class MqttListener {
 
     @EventListener(ApplicationReadyEvent.class)
     public void subscribe() throws MqttException {
+
         this.gateId = registerGateway();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        mqttClient.subscribe("data/#", (topic, message) ->
+        mqttClient.subscribe("data/#", 1, (topic, message) ->
                 handleMessage(objectMapper, topic, message));
 
         log.info("토픽 패턴 구독 완료: data/#");
@@ -78,7 +79,6 @@ public class MqttListener {
                 long timestamp = node.has("time") ? node.get("time").asLong() : System.currentTimeMillis();
 
                 TopicInfo topicInfo = parseTopicParts(topic);
-                log.info("[디버깅] topicInfo 파싱 결과: {}", topicInfo);
 
                 if (topicInfo == null) {
                     log.warn("TopicInfo 생성 실패, 메시지 무시됨 - topic: {}", topic);
@@ -88,8 +88,6 @@ public class MqttListener {
 
                 String newTopic = buildNewTopic(topicInfo, gateId);
                 String messageContent = buildNewMessage(timestamp, value);
-                log.info("[디버깅] buildNewTopic 결과: {}", newTopic);
-                log.info("[디버깅] publishMessage 호출: 토픽={}, 페이로드={}", newTopic, messageContent);
 
                 publishMessage(newTopic, messageContent);
 
@@ -182,6 +180,8 @@ public class MqttListener {
         String position = getPart(parts, "n");
         String element = getPart(parts, "e");
 
+        log.info("[디버깅] 토픽: {}, p: {}, d: {}, n: {}, e: {}", topic, place, deviceId, position, element);
+
         if (place == null || deviceId == null || position == null || element == null) {
             log.warn("토픽 필수 파트 누락 - topic: {}", topic);
 
@@ -227,6 +227,7 @@ public class MqttListener {
     private String getPart(String[] parts, String key) {
         for (int i = 0; i < parts.length - 1; i++) {
             if (parts[i].equals(key)) {
+                log.info("[디버깅] key : {}, value : {}", key, parts[i+1]);
                 return parts[i + 1];
             }
         }
