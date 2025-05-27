@@ -1,7 +1,7 @@
 package com.nhnacademy.gateway.gateway_info.repository.impl;
 
-import com.nhnacademy.gateway.broker.mqtt.dto.MqttBroker;
-import com.nhnacademy.gateway.broker.mqtt.dto.QMqttBroker;
+import com.nhnacademy.gateway.broker.mqtt.dto.MqttInboundBroker;
+import com.nhnacademy.gateway.broker.mqtt.dto.QMqttInboundBroker;
 import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.domain.QGateway;
@@ -24,12 +24,13 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
     }
 
     @Override
-    public List<MqttBroker> getMqttBrokers() {
+    public List<MqttInboundBroker> getMqttBrokers() {
         return queryFactory
                 .select(
-                        new QMqttBroker(
-                                qGateway.ipAddress,
+                        new QMqttInboundBroker(
+                                qGateway.address,
                                 qGateway.port,
+                                qGateway.protocol,
                                 qGateway.clientId
                         )
                 )

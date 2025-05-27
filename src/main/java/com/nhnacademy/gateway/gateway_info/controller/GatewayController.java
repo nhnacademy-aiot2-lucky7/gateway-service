@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/gateways")
 public class GatewayController {
@@ -21,12 +23,10 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    /// TODO: 추후 Web-Front-End에서 사용할 수 있도록 구성할 예정...
-    @GetMapping("/protocols")
-    public ResponseEntity<Void> getProtocols() {
+    @GetMapping("/supported-protocols")
+    public ResponseEntity<List<String>> getSupportedProtocols() {
         return ResponseEntity
-                .noContent()
-                .build();
+                .ok(gatewayService.getSupportedProtocols());
     }
 
     @PostMapping

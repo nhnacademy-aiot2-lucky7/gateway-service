@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public final class GatewayRegisterRequest implements GatewayRequest {
 
-    private final String ipAddress;
+    private final String address;
 
     private final Integer port;
 
@@ -22,14 +22,14 @@ public final class GatewayRegisterRequest implements GatewayRequest {
 
     @JsonCreator
     public GatewayRegisterRequest(
-            @JsonProperty("ip_address") String ipAddress,
+            @JsonProperty("address") String address,
             @JsonProperty("port") Integer port,
             @JsonProperty("protocol") IoTProtocol protocol,
             @JsonProperty("gateway_name") String gatewayName,
             @JsonProperty("department_id") String departmentId,
             @JsonProperty("description") String description
     ) {
-        this.ipAddress = ipAddress;
+        this.address = address;
         this.port = port;
         this.protocol = protocol;
         this.gatewayName = gatewayName;

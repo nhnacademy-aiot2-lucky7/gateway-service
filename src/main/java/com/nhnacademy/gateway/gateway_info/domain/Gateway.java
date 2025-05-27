@@ -27,8 +27,8 @@ public class Gateway {
     @Comment("게이트웨이_번호")
     private Integer gatewayNo;
 
-    @Column(name = "ip_address", nullable = false)
-    private String ipAddress;
+    @Column(name = "gateway_address", nullable = false)
+    private String address;
 
     @Column(name = "gateway_port", nullable = false)
     private Integer port;
@@ -62,11 +62,11 @@ public class Gateway {
     }
 
     private Gateway(
-            String ipAddress, Integer port, IoTProtocol protocol,
+            String address, Integer port, IoTProtocol protocol,
             String gatewayName, String clientId, String departmentId,
             String description, Boolean thresholdStatus
     ) {
-        this.ipAddress = ipAddress;
+        this.address = address;
         this.port = port;
         this.protocol = protocol;
         this.gatewayName = gatewayName;
@@ -77,12 +77,12 @@ public class Gateway {
     }
 
     public static Gateway ofNewGateway(
-            String ipAddress, Integer port, IoTProtocol protocol,
+            String address, Integer port, IoTProtocol protocol,
             String gatewayName, String clientId, String departmentId,
             String description, Boolean thresholdStatus
     ) {
         return new Gateway(
-                ipAddress,
+                address,
                 port,
                 protocol,
                 gatewayName,
