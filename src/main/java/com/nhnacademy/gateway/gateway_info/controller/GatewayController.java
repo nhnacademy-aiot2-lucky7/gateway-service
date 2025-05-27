@@ -30,12 +30,11 @@ public class GatewayController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> registerGateway(
+    public ResponseEntity<Integer> registerGateway(
             @Validated @RequestBody GatewayRegisterRequest request
     ) {
-        gatewayService.registerGateway(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(gatewayService.registerGateway(request));
     }
 }

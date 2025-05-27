@@ -8,6 +8,8 @@ import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class GatewayServiceImpl implements GatewayService {
 
@@ -18,22 +20,21 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public void registerGateway(GatewayRegisterRequest request) {
+    public int registerGateway(GatewayRegisterRequest request) {
         if (isExistsGateway(request)) {
-            throw new GatewayAlreadyExistsException(
-                    request.getIpAddress(),
-                    request.getPort()
-            );
+            throw new GatewayAlreadyExistsException();
         }
         Gateway gateway = Gateway.ofNewGateway(
                 request.getIpAddress(),
                 request.getPort(),
                 request.getProtocol(),
                 request.getGatewayName(),
+                UUID.randomUUID().toString(),
                 request.getDepartmentId(),
                 request.getDescription()
         );
-        gatewayRepository.save(gateway);
+        return gatewayRepository.save(gateway)
+                .getGatewayNo();
     }
 
     @Override

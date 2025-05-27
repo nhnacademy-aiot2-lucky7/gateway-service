@@ -15,7 +15,6 @@ import lombok.Getter;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "gateways")
@@ -28,7 +27,7 @@ public class Gateway {
     @Comment("게이트웨이_번호")
     private Integer gatewayNo;
 
-    @Column(name = "id_address", nullable = false)
+    @Column(name = "ip_address", nullable = false)
     private String ipAddress;
 
     @Column(name = "gateway_port", nullable = false)
@@ -56,7 +55,7 @@ public class Gateway {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_ad")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     protected Gateway() {
@@ -79,14 +78,15 @@ public class Gateway {
 
     public static Gateway ofNewGateway(
             String ipAddress, Integer port, IoTProtocol protocol,
-            String gatewayName, String departmentId, String description
+            String gatewayName, String clientId, String departmentId,
+            String description
     ) {
         return new Gateway(
                 ipAddress,
                 port,
                 protocol,
                 gatewayName,
-                UUID.randomUUID().toString(),
+                clientId,
                 departmentId,
                 description,
                 false
