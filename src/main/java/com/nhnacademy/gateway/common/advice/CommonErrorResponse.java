@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class CommonErrorResponse {
+public final class CommonErrorResponse {
 
     private final LocalDateTime timestamp;
 
