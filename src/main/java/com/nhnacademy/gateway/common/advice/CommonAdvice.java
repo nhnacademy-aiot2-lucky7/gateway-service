@@ -72,4 +72,22 @@ public class CommonAdvice {
                         path
                 ));
     }
+
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<CommonErrorResponse> throwableHandler(
+            Throwable e,
+            HttpServletRequest request
+    ) {
+        String path = request.getRequestURI();
+        log.warn("path({}): {}", path, e.getMessage(), e);
+        int httpStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+        return ResponseEntity
+                .status(httpStatus)
+                .body(CommonErrorResponse.of(
+                        httpStatus,
+                        e.getMessage(),
+                        path
+                ));
+    }
 }

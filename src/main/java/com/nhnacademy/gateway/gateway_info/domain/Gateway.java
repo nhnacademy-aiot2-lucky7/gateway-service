@@ -79,7 +79,7 @@ public class Gateway {
     public static Gateway ofNewGateway(
             String ipAddress, Integer port, IoTProtocol protocol,
             String gatewayName, String clientId, String departmentId,
-            String description
+            String description, Boolean thresholdStatus
     ) {
         return new Gateway(
                 ipAddress,
@@ -89,7 +89,7 @@ public class Gateway {
                 clientId,
                 departmentId,
                 description,
-                false
+                thresholdStatus
         );
     }
 

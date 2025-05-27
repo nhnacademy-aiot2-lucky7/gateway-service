@@ -31,7 +31,8 @@ public class GatewayServiceImpl implements GatewayService {
                 request.getGatewayName(),
                 UUID.randomUUID().toString(),
                 request.getDepartmentId(),
-                request.getDescription()
+                request.getDescription(),
+                false
         );
         return gatewayRepository.save(gateway)
                 .getGatewayNo();
