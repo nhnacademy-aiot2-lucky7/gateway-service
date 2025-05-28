@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 public abstract class MqttBroker {
 
+    private final long gatewayNo;
+
     private final String address;
 
     private final int port;
@@ -14,11 +16,21 @@ public abstract class MqttBroker {
 
     private final String clientId;
 
-    protected MqttBroker(String address, int port, IoTProtocol protocol, String clientId) {
+    private final BrokerType brokerType;
+
+    private final String topic = "data/#";
+
+    protected MqttBroker(
+            long gatewayNo, String address, int port,
+            IoTProtocol protocol, String clientId,
+            BrokerType brokerType
+    ) {
+        this.gatewayNo = gatewayNo;
         this.address = address;
         this.port = port;
         this.protocol = protocol;
         this.clientId = clientId;
+        this.brokerType = brokerType;
     }
 
     public String getServerURI() {
@@ -29,7 +41,7 @@ public abstract class MqttBroker {
         );
     }
 
-    public String buildClientIdWithTimestamp() {
+    public String getBuildClientIdWithTimestamp() {
         return "%s_%d".formatted(
                 clientId,
                 System.currentTimeMillis()

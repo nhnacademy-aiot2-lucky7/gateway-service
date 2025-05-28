@@ -8,7 +8,17 @@ import lombok.Getter;
 public final class MqttInboundBroker extends MqttBroker {
 
     @QueryProjection
-    public MqttInboundBroker(String address, int port, IoTProtocol protocol, String clientId) {
-        super(address, port, protocol, clientId);
+    public MqttInboundBroker(
+            long gatewayNo, String address, int port,
+            IoTProtocol protocol, String clientId
+    ) {
+        super(
+                gatewayNo,
+                address,
+                port,
+                protocol,
+                clientId,
+                BrokerType.INBOUND
+        );
     }
 }
