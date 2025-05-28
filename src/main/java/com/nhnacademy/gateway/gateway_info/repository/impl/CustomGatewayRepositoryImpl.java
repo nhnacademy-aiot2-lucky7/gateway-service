@@ -29,7 +29,7 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
         return queryFactory
                 .select(qGateway.departmentId)
                 .from(qGateway)
-                .where(qGateway.gatewayNo.eq(gatewayNo))
+                .where(qGateway.gatewayId.eq(gatewayNo))
                 .fetchOne();
     }
 
@@ -39,7 +39,7 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
                 queryFactory
                         .select(
                                 new QMqttInboundBroker(
-                                        qGateway.gatewayNo,
+                                        qGateway.gatewayId,
                                         qGateway.address,
                                         qGateway.port,
                                         qGateway.protocol,

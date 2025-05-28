@@ -41,7 +41,7 @@ public class GatewayServiceImpl implements GatewayService {
                 false
         );
         return gatewayRepository.save(gateway)
-                .getGatewayNo();
+                .getGatewayId();
     }
 
     public boolean isExistsGatewayNo(long gatewayNo) {
