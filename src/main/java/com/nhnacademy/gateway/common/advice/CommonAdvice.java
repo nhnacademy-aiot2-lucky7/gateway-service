@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,23 @@ public class CommonAdvice {
         this.namingBase = (namingStrategy instanceof PropertyNamingStrategies.NamingBase namingBase)
                 ? namingBase
                 : null;
+    }
+
+    @ExceptionHandler({
+            MissingPathVariableException.class,
+            MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity<CommonErrorResponse> pathVariableExceptionHandler(
+            Exception e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .badRequest()
+                .body(CommonErrorResponse.of(
+                        HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage(),
+                        logAndGetPath(request, e)
+                ));
     }
 
     @ExceptionHandler(BindException.class)
@@ -52,7 +71,7 @@ public class CommonAdvice {
                 .body(CommonErrorResponse.of(
                         HttpStatus.BAD_REQUEST.value(),
                         String.join(", ", errors),
-                        request.getRequestURI()
+                        logAndGetPath(request, e)
                 ));
     }
 
@@ -61,15 +80,12 @@ public class CommonAdvice {
             CommonHttpException e,
             HttpServletRequest request
     ) {
-        String path = request.getRequestURI();
-        log.warn("path({}): {}", path, e.getMessage(), e);
-
         return ResponseEntity
                 .status(e.getStatusCode())
                 .body(CommonErrorResponse.of(
                         e.getStatusCode(),
                         e.getMessage(),
-                        path
+                        logAndGetPath(request, e)
                 ));
     }
 
@@ -78,16 +94,18 @@ public class CommonAdvice {
             Throwable e,
             HttpServletRequest request
     ) {
+        return ResponseEntity
+                .badRequest()
+                .body(CommonErrorResponse.of(
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        e.getMessage(),
+                        logAndGetPath(request, e)
+                ));
+    }
+
+    private String logAndGetPath(HttpServletRequest request, Throwable e) {
         String path = request.getRequestURI();
         log.warn("path({}): {}", path, e.getMessage(), e);
-        int httpStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
-
-        return ResponseEntity
-                .status(httpStatus)
-                .body(CommonErrorResponse.of(
-                        httpStatus,
-                        e.getMessage(),
-                        path
-                ));
+        return path;
     }
 }
