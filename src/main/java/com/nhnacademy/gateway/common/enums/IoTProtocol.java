@@ -17,7 +17,7 @@ public enum IoTProtocol {
         return this == MQTT_TLS || this == HTTPS;
     }*/
 
-    public static final String[] VALID_VALUES_STRING_ARRAY;
+    public static String[] VALID_VALUES_STRING_ARRAY;
 
     static {
         VALID_VALUES_STRING_ARRAY = Arrays.stream(IoTProtocol.values())

@@ -28,7 +28,7 @@ public class GatewayController {
     }
 
     @PostMapping
-    public ResponseEntity<Integer> registerGateway(
+    public ResponseEntity<Long> registerGateway(
             @Validated @RequestBody GatewayRegisterRequest request
     ) {
         return ResponseEntity

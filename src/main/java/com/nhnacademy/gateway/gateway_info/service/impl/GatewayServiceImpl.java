@@ -9,7 +9,6 @@ import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,7 +26,7 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public int registerGateway(GatewayRegisterRequest request) {
+    public long registerGateway(GatewayRegisterRequest request) {
         if (isExistsGateway(request)) {
             throw new GatewayAlreadyExistsException();
         }
@@ -45,6 +44,10 @@ public class GatewayServiceImpl implements GatewayService {
                 .getGatewayNo();
     }
 
+    public boolean isExistsGatewayNo(long gatewayNo) {
+        return gatewayRepository.existsById(gatewayNo);
+    }
+
     @Override
     public boolean isExistsGateway(GatewayRequest request) {
         return gatewayRepository.existsGatewayByAddressAndPort(
@@ -52,4 +55,12 @@ public class GatewayServiceImpl implements GatewayService {
                 request.getPort()
         );
     }
+
+    /*@Override
+    public String getDepartmentIdByGatewayNo(long gatewayNo) {
+        if (!isExistsGatewayNo(gatewayNo)) {
+            throw new GatewayNotFoundException();
+        }
+        return gatewayRepository.getDepartmentIdByGatewayNo(gatewayNo);
+    }*/
 }

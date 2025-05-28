@@ -7,7 +7,7 @@ public interface GatewayService {
 
     String[] getSupportedProtocols();
 
-    int registerGateway(GatewayRegisterRequest request);
+    long registerGateway(GatewayRegisterRequest request);
 
     boolean isExistsGateway(GatewayRequest request);
 }

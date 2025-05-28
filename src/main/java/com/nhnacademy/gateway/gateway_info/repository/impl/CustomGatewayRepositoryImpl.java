@@ -1,6 +1,6 @@
 package com.nhnacademy.gateway.gateway_info.repository.impl;
 
-import com.nhnacademy.gateway.broker.mqtt.dto.MqttInboundBroker;
+import com.nhnacademy.gateway.broker.mqtt.dto.MqttBroker;
 import com.nhnacademy.gateway.broker.mqtt.dto.QMqttInboundBroker;
 import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
@@ -9,6 +9,7 @@ import com.nhnacademy.gateway.gateway_info.repository.CustomGatewayRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport implements CustomGatewayRepository {
@@ -24,18 +25,30 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
     }
 
     @Override
-    public List<MqttInboundBroker> getMqttBrokers() {
+    public String getDepartmentIdByGatewayNo(long gatewayNo) {
         return queryFactory
-                .select(
-                        new QMqttInboundBroker(
-                                qGateway.address,
-                                qGateway.port,
-                                qGateway.protocol,
-                                qGateway.clientId
-                        )
-                )
+                .select(qGateway.departmentId)
                 .from(qGateway)
-                .where(qGateway.protocol.eq(IoTProtocol.MQTT))
-                .fetch();
+                .where(qGateway.gatewayNo.eq(gatewayNo))
+                .fetchOne();
+    }
+
+    @Override
+    public List<MqttBroker> getMqttBrokers() {
+        return new ArrayList<>(
+                queryFactory
+                        .select(
+                                new QMqttInboundBroker(
+                                        qGateway.gatewayNo,
+                                        qGateway.address,
+                                        qGateway.port,
+                                        qGateway.protocol,
+                                        qGateway.clientId
+                                )
+                        )
+                        .from(qGateway)
+                        .where(qGateway.protocol.eq(IoTProtocol.MQTT))
+                        .fetch()
+        );
     }
 }
