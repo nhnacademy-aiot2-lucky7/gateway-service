@@ -27,11 +27,6 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public List<String> getSupportedProtocolList() {
-        return IoTProtocol.VALID_VALUES_STRING_LIST;
-    }
-
-    @Override
     public int registerGateway(GatewayRegisterRequest request) {
         if (isExistsGateway(request)) {
             throw new GatewayAlreadyExistsException();

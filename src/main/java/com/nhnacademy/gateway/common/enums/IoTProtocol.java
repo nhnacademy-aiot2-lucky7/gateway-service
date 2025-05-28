@@ -1,7 +1,6 @@
 package com.nhnacademy.gateway.common.enums;
 
 import java.util.Arrays;
-import java.util.List;
 
 public enum IoTProtocol {
 
@@ -20,13 +19,10 @@ public enum IoTProtocol {
 
     public static final String[] VALID_VALUES_STRING_ARRAY;
 
-    public static final List<String> VALID_VALUES_STRING_LIST;
-
     static {
-        VALID_VALUES_STRING_LIST = Arrays.stream(IoTProtocol.values())
+        VALID_VALUES_STRING_ARRAY = Arrays.stream(IoTProtocol.values())
                 .map(Enum::name)
-                .toList();
-        VALID_VALUES_STRING_ARRAY = VALID_VALUES_STRING_LIST.toArray(String[]::new);
+                .toArray(String[]::new);
     }
 
     public boolean isSecure() {
