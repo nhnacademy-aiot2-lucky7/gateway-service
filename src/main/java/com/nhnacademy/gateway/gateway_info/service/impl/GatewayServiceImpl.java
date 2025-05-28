@@ -9,7 +9,6 @@ import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,10 +22,13 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public List<String> getSupportedProtocols() {
-        return Arrays.stream(IoTProtocol.values())
-                .map(Enum::name)
-                .toList();
+    public String[] getSupportedProtocols() {
+        return IoTProtocol.VALID_VALUES_STRING_ARRAY;
+    }
+
+    @Override
+    public List<String> getSupportedProtocolList() {
+        return IoTProtocol.VALID_VALUES_STRING_LIST;
     }
 
     @Override

@@ -24,9 +24,15 @@ public class GatewayController {
     }
 
     @GetMapping("/supported-protocols")
-    public ResponseEntity<List<String>> getSupportedProtocols() {
+    public ResponseEntity<String[]> getSupportedProtocols() {
         return ResponseEntity
                 .ok(gatewayService.getSupportedProtocols());
+    }
+
+    @GetMapping("/supported-protocols/list")
+    public ResponseEntity<List<String>> getTest() {
+        return ResponseEntity
+                .ok(gatewayService.getSupportedProtocolList());
     }
 
     @PostMapping

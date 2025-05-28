@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface GatewayService {
 
-    List<String> getSupportedProtocols();
+    String[] getSupportedProtocols();
+
+    List<String> getSupportedProtocolList();
 
     int registerGateway(GatewayRegisterRequest request);
 
