@@ -73,7 +73,7 @@ public final class ForwardingMqttCallback implements MqttCallback {
         }
 
         // 순서(공간 -> 상세 위치 -> 게이트웨이 아이디 -> 센서 아이디 -> 데이터 타입)
-        String newTopic = "team1-data/s/nhnacademy/b/gyeongnam_campusp/p/%s/n/%s/g/%d/d/%s/e/%s"
+        String newTopic = "team1_data/s/nhnacademy/b/gyeongnam_campusp/p/%s/n/%s/g/%d/d/%s/e/%s"
                 .formatted(p, n, gatewayNo, d, e);
 
         log.debug("newTopic: {}", newTopic);
