@@ -9,7 +9,6 @@ import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -27,19 +26,16 @@ public class ApplicationStartListener implements ApplicationListener<Application
     private final MqttBroker mqttCoreBroker;
 
     private final DataParser dataParser;
-    private final ClientHttpRequestFactoryBuilder<?> clientHttpRequestFactoryBuilder;
 
     public ApplicationStartListener(
             GatewayRepository gatewayRepository,
             MqttClientFactory mqttClientFactory,
             @Qualifier("mqttCoreBroker") MqttBroker mqttCoreBroker,
-            @Qualifier("jsonDataParser") DataParser dataParser,
-            ClientHttpRequestFactoryBuilder<?> clientHttpRequestFactoryBuilder) {
+            @Qualifier("jsonDataParser") DataParser dataParser) {
         this.gatewayRepository = gatewayRepository;
         this.mqttClientFactory = mqttClientFactory;
         this.mqttCoreBroker = mqttCoreBroker;
         this.dataParser = dataParser;
-        this.clientHttpRequestFactoryBuilder = clientHttpRequestFactoryBuilder;
     }
 
     @Override

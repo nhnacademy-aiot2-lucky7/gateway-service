@@ -16,20 +16,23 @@ public abstract class MqttBroker {
 
     private final String clientId;
 
+    private final String topic;
+
+    private final int qos;
+
     private final BrokerType brokerType;
 
-    private final String topic = "data/#";
-
     protected MqttBroker(
-            long gatewayId, String address, int port,
-            IoTProtocol protocol, String clientId,
-            BrokerType brokerType
+            long gatewayId, String address, int port, IoTProtocol protocol,
+            String clientId, String topic, int qos, BrokerType brokerType
     ) {
         this.gatewayId = gatewayId;
         this.address = address;
         this.port = port;
         this.protocol = protocol;
         this.clientId = clientId;
+        this.topic = topic;
+        this.qos = qos;
         this.brokerType = brokerType;
     }
 

@@ -20,7 +20,7 @@ public final class CoreBrokerProperties {
 
     private String clientId = "core-broker-sender";
 
-    private String topic = "project-data/";
+    private String topic = "team1_data/";
 
     private Integer qos = 1;
 

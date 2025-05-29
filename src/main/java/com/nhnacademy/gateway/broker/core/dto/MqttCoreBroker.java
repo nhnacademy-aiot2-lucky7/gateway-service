@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component;
 @Component
 public final class MqttCoreBroker extends MqttBroker {
 
-    public MqttCoreBroker(
-            CoreBrokerProperties properties
-    ) {
+    public MqttCoreBroker(CoreBrokerProperties properties) {
         super(
                 0L,
                 properties.getAddress(),
                 properties.getPort(),
                 properties.isSecure() ? IoTProtocol.MQTT_TLS : IoTProtocol.MQTT,
                 properties.getClientId(),
+                properties.getTopic(),
+                properties.getQos(),
                 BrokerType.CORE
         );
     }
