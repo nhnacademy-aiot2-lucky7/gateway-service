@@ -46,7 +46,7 @@ public class ApplicationStartListener implements ApplicationListener<Application
         try {
             coreClient.connect().waitForCompletion();
         } catch (MqttException e) {
-            throw new RuntimeException("Core Broker 구독 실패!");
+            throw new RuntimeException("Core Broker 구독 실패!: " + e.getMessage());
         }
 
         List<MqttBroker> mqttBrokers = gatewayRepository.getMqttBrokers();
@@ -70,7 +70,8 @@ public class ApplicationStartListener implements ApplicationListener<Application
             try {
                 inboundClient.connect().waitForCompletion();
                 inboundClient.subscribe("data/#", 1);
-            } catch (MqttException ignore) {
+            } catch (MqttException e) {
+                throw new RuntimeException("Inbound Broker 구독 실패!: " + e.getMessage());
             }
         }
     }
