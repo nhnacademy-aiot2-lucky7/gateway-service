@@ -25,11 +25,11 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
     }
 
     @Override
-    public String getDepartmentIdByGatewayNo(long gatewayNo) {
+    public String getDepartmentIdByGatewayId(long gatewayId) {
         return queryFactory
                 .select(qGateway.departmentId)
                 .from(qGateway)
-                .where(qGateway.gatewayId.eq(gatewayNo))
+                .where(qGateway.gatewayId.eq(gatewayId))
                 .fetchOne();
     }
 

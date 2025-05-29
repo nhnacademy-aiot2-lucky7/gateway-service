@@ -9,9 +9,9 @@ public interface CustomGatewayRepository {
     /**
      * SELECT department_id
      * FROM gateways
-     * WHERE gateway_no = ?
+     * WHERE gateway_id = ?
      */
-    String getDepartmentIdByGatewayNo(long gatewayNo);
+    String getDepartmentIdByGatewayId(long gatewayId);
 
     List<MqttBroker> getMqttBrokers();
 }

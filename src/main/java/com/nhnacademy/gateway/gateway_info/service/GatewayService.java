@@ -10,4 +10,6 @@ public interface GatewayService {
     long registerGateway(GatewayRegisterRequest request);
 
     boolean isExistsGateway(GatewayRequest request);
+
+    String getDepartmentIdByGatewayNo(long gatewayNo);
 }

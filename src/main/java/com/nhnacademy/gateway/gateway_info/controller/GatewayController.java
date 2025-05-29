@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,14 @@ public class GatewayController {
     public ResponseEntity<String[]> getSupportedProtocols() {
         return ResponseEntity
                 .ok(gatewayService.getSupportedProtocols());
+    }
+
+    @GetMapping("/{gateway-id}/department-id")
+    public ResponseEntity<String> getDepartment(
+            @PathVariable("gateway-id") Long gatewayId
+    ) {
+        return ResponseEntity
+                .ok(gatewayService.getDepartmentIdByGatewayNo(gatewayId));
     }
 
     @PostMapping
