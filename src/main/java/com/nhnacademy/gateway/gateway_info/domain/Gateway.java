@@ -43,7 +43,7 @@ public class Gateway {
     @Column(name = "client_id", length = 50, nullable = false, updatable = false)
     private String clientId;
 
-    @Column(name = "department_id", nullable = false)
+    @Column(name = "department_id", length = 50, nullable = false)
     private String departmentId;
 
     @Column(name = "description", columnDefinition = "text")

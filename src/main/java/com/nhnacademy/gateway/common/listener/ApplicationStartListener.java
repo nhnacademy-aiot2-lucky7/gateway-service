@@ -42,18 +42,6 @@ public class ApplicationStartListener implements ApplicationListener<Application
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        Gateway gateway = Gateway.ofNewGateway(
-                "115.94.72.197",
-                1883,
-                IoTProtocol.MQTT,
-                "NHN Academy 경남",
-                UUID.randomUUID().toString(),
-                "nhnacademy",
-                "",
-                false
-        );
-        gatewayRepository.save(gateway);
-
         IMqttAsyncClient coreClient = coreClient();
         try {
             coreClient.connect().waitForCompletion();
