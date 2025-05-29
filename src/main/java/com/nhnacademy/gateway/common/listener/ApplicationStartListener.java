@@ -61,7 +61,7 @@ public class ApplicationStartListener implements ApplicationListener<Application
             inboundClient
                     .setCallback(
                             new ForwardingMqttCallback(
-                                    mqttBrokers.get(n).getGatewayNo(),
+                                    mqttBrokers.get(n).getGatewayId(),
                                     coreClient,
                                     dataParser
                             )
