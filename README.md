@@ -1,1 +1,1 @@
-# gateway-service-demo
+# gateway-service
