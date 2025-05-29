@@ -50,7 +50,7 @@ public class MqttClientFactory {
                 inboundClients.add(createMqttClient(mqttBroker));
             } catch (MqttException e) {
                 log.warn("[Client ID: {} / serverURI: {}]의 데이터 형식이 잘못되어 있습니다 - {}",
-                        mqttBroker.getServerURI(), mqttBroker.getClientId(), e.getMessage(), e);
+                        mqttBroker.getClientId(), mqttBroker.getServerURI(), e.getMessage(), e);
             }
         }
         return inboundClients;
