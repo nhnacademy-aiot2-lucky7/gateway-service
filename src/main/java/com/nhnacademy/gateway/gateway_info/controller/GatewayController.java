@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +22,22 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    /// TODO: 추후 Web-Front-End에서 사용할 수 있도록 구성할 예정...
-    @GetMapping("/protocols")
-    public ResponseEntity<Void> getProtocols() {
+    @GetMapping("/supported-protocols")
+    public ResponseEntity<String[]> getSupportedProtocols() {
         return ResponseEntity
-                .noContent()
-                .build();
+                .ok(gatewayService.getSupportedProtocols());
+    }
+
+    @GetMapping("/{gateway-id}/department-id")
+    public ResponseEntity<String> getDepartment(
+            @PathVariable("gateway-id") Long gatewayId
+    ) {
+        return ResponseEntity
+                .ok(gatewayService.getDepartmentIdByGatewayId(gatewayId));
     }
 
     @PostMapping
-    public ResponseEntity<Integer> registerGateway(
+    public ResponseEntity<Long> registerGateway(
             @Validated @RequestBody GatewayRegisterRequest request
     ) {
         return ResponseEntity

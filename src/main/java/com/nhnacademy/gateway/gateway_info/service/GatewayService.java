@@ -5,7 +5,11 @@ import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 
 public interface GatewayService {
 
-    int registerGateway(GatewayRegisterRequest request);
+    String[] getSupportedProtocols();
+
+    long registerGateway(GatewayRegisterRequest request);
 
     boolean isExistsGateway(GatewayRequest request);
+
+    String getDepartmentIdByGatewayId(long gatewayId);
 }

@@ -1,6 +1,8 @@
 package com.nhnacademy.gateway.gateway_info.service.impl;
 
+import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsException;
+import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
@@ -20,12 +22,17 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public int registerGateway(GatewayRegisterRequest request) {
+    public String[] getSupportedProtocols() {
+        return IoTProtocol.VALID_VALUES_STRING_ARRAY;
+    }
+
+    @Override
+    public long registerGateway(GatewayRegisterRequest request) {
         if (isExistsGateway(request)) {
             throw new GatewayAlreadyExistsException();
         }
         Gateway gateway = Gateway.ofNewGateway(
-                request.getIpAddress(),
+                request.getAddress(),
                 request.getPort(),
                 request.getProtocol(),
                 request.getGatewayName(),
@@ -35,14 +42,26 @@ public class GatewayServiceImpl implements GatewayService {
                 false
         );
         return gatewayRepository.save(gateway)
-                .getGatewayNo();
+                .getGatewayId();
+    }
+
+    public boolean isExistsGatewayId(long gatewayId) {
+        return gatewayRepository.existsById(gatewayId);
     }
 
     @Override
     public boolean isExistsGateway(GatewayRequest request) {
-        return gatewayRepository.existsGatewayByIpAddressAndPort(
-                request.getIpAddress(),
+        return gatewayRepository.existsGatewayByAddressAndPort(
+                request.getAddress(),
                 request.getPort()
         );
+    }
+
+    @Override
+    public String getDepartmentIdByGatewayId(long gatewayId) {
+        if (!isExistsGatewayId(gatewayId)) {
+            throw new GatewayNotFoundException();
+        }
+        return gatewayRepository.getDepartmentIdByGatewayId(gatewayId);
     }
 }
