@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public abstract class MqttBroker {
 
-    private final long gatewayNo;
+    private final long gatewayId;
 
     private final String address;
 
@@ -21,11 +21,11 @@ public abstract class MqttBroker {
     private final String topic = "data/#";
 
     protected MqttBroker(
-            long gatewayNo, String address, int port,
+            long gatewayId, String address, int port,
             IoTProtocol protocol, String clientId,
             BrokerType brokerType
     ) {
-        this.gatewayNo = gatewayNo;
+        this.gatewayId = gatewayId;
         this.address = address;
         this.port = port;
         this.protocol = protocol;

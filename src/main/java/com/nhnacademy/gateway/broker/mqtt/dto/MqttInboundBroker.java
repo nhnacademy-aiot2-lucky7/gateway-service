@@ -9,11 +9,11 @@ public final class MqttInboundBroker extends MqttBroker {
 
     @QueryProjection
     public MqttInboundBroker(
-            long gatewayNo, String address, int port,
+            long gatewayId, String address, int port,
             IoTProtocol protocol, String clientId
     ) {
         super(
-                gatewayNo,
+                gatewayId,
                 address,
                 port,
                 protocol,
