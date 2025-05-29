@@ -45,8 +45,8 @@ public class GatewayServiceImpl implements GatewayService {
                 .getGatewayId();
     }
 
-    public boolean isExistsGatewayNo(long gatewayNo) {
-        return gatewayRepository.existsById(gatewayNo);
+    public boolean isExistsGatewayId(long gatewayId) {
+        return gatewayRepository.existsById(gatewayId);
     }
 
     @Override
@@ -58,10 +58,10 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public String getDepartmentIdByGatewayNo(long gatewayNo) {
-        if (!isExistsGatewayNo(gatewayNo)) {
+    public String getDepartmentIdByGatewayId(long gatewayId) {
+        if (!isExistsGatewayId(gatewayId)) {
             throw new GatewayNotFoundException();
         }
-        return gatewayRepository.getDepartmentIdByGatewayId(gatewayNo);
+        return gatewayRepository.getDepartmentIdByGatewayId(gatewayId);
     }
 }

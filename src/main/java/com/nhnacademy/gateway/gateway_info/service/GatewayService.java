@@ -11,5 +11,5 @@ public interface GatewayService {
 
     boolean isExistsGateway(GatewayRequest request);
 
-    String getDepartmentIdByGatewayNo(long gatewayNo);
+    String getDepartmentIdByGatewayId(long gatewayId);
 }

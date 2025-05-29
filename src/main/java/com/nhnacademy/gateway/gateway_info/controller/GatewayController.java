@@ -33,7 +33,7 @@ public class GatewayController {
             @PathVariable("gateway-id") Long gatewayId
     ) {
         return ResponseEntity
-                .ok(gatewayService.getDepartmentIdByGatewayNo(gatewayId));
+                .ok(gatewayService.getDepartmentIdByGatewayId(gatewayId));
     }
 
     @PostMapping

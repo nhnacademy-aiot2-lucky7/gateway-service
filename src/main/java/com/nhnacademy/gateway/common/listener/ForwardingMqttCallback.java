@@ -16,17 +16,17 @@ import java.util.Map;
 @Slf4j
 public final class ForwardingMqttCallback implements MqttCallback {
 
-    private final long gatewayNo;
+    private final long gatewayId;
 
     private final IMqttAsyncClient targetClient;
 
     private final DataParser dataParser;
 
     public ForwardingMqttCallback(
-            long gatewayNo, IMqttAsyncClient targetClient,
+            long gatewayId, IMqttAsyncClient targetClient,
             DataParser dataParser
     ) {
-        this.gatewayNo = gatewayNo;
+        this.gatewayId = gatewayId;
         this.targetClient = targetClient;
         this.dataParser = dataParser;
     }
@@ -74,7 +74,7 @@ public final class ForwardingMqttCallback implements MqttCallback {
 
         // 순서(공간 -> 상세 위치 -> 게이트웨이 아이디 -> 센서 아이디 -> 데이터 타입)
         String newTopic = "team1_data/s/nhnacademy/b/gyeongnam_campusp/p/%s/n/%s/g/%d/d/%s/e/%s"
-                .formatted(p, n, gatewayNo, d, e);
+                .formatted(p, n, gatewayId, d, e);
 
         log.debug("newTopic: {}", newTopic);
         log.debug("==================================");
