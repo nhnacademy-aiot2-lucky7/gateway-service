@@ -34,6 +34,14 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
     }
 
     @Override
+    public List<Long> getGatewayIds() {
+        return queryFactory
+                .select(qGateway.gatewayId)
+                .from(qGateway)
+                .fetch();
+    }
+
+    @Override
     public List<MqttBroker> getMqttBrokers() {
         return new ArrayList<>(
                 queryFactory

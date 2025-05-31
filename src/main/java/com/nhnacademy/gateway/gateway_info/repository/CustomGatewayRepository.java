@@ -13,5 +13,7 @@ public interface CustomGatewayRepository {
      */
     String getDepartmentIdByGatewayId(long gatewayId);
 
+    List<Long> getGatewayIds();
+
     List<MqttBroker> getMqttBrokers();
 }
