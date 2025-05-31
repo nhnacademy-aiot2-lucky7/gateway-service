@@ -18,6 +18,8 @@ public final class MqttInboundBroker extends MqttBroker {
                 port,
                 protocol,
                 clientId,
+                "data/#",
+                1,
                 BrokerType.INBOUND
         );
     }
