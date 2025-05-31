@@ -10,6 +10,7 @@ import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -63,5 +64,10 @@ public class GatewayServiceImpl implements GatewayService {
             throw new GatewayNotFoundException();
         }
         return gatewayRepository.getDepartmentIdByGatewayId(gatewayId);
+    }
+
+    @Override
+    public List<Long> getGatewayIds() {
+        return gatewayRepository.getGatewayIds();
     }
 }

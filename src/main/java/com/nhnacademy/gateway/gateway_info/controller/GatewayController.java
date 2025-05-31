@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/gateways")
 public class GatewayController {
@@ -20,6 +22,12 @@ public class GatewayController {
 
     public GatewayController(GatewayService gatewayService) {
         this.gatewayService = gatewayService;
+    }
+
+    @GetMapping("/ids")
+    public ResponseEntity<List<Long>> getGatewayIds() {
+        return ResponseEntity
+                .ok(gatewayService.getGatewayIds());
     }
 
     @GetMapping("/supported-protocols")
