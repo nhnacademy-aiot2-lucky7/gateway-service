@@ -5,10 +5,10 @@ import java.util.Arrays;
 public enum IoTProtocol {
 
     MQTT,
-    MQTT_TLS;
-    /*MODBUS_TCP,
-    MODBUS_RTU,
-    COAP,
+    MQTT_TLS,
+    MODBUS_TCP,
+    MODBUS_RTU;
+    /*COAP,
     HTTP,
     HTTPS,
     WEBSOCKET;
