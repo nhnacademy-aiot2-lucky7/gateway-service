@@ -102,4 +102,8 @@ public class Gateway {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateThresholdStatus(){
+        this.thresholdStatus = true;
+    }
 }

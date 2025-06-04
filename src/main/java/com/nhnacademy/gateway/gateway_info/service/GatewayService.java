@@ -19,4 +19,6 @@ public interface GatewayService {
     List<Long> getGatewayIds();
 
     List<GatewayInfoResponse> getGateways(String departmentId);
+
+    void updateThresholdStatus(Long gatewayId);
 }
