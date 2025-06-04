@@ -4,6 +4,7 @@ import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsException;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
@@ -69,5 +70,10 @@ public class GatewayServiceImpl implements GatewayService {
     @Override
     public List<Long> getGatewayIds() {
         return gatewayRepository.getGatewayIds();
+    }
+
+    @Override
+    public List<GatewayInfoResponse> getGateways(String departmentId) {
+        return gatewayRepository.getGateways(departmentId);
     }
 }
