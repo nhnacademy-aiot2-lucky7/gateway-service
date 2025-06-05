@@ -27,9 +27,9 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    @GetMapping
+    @GetMapping("/department/{department-id}")
     public ResponseEntity<List<GatewaySummaryResponse>> getGatewaySummariesByDepartmentId(
-            @RequestBody String departmentId
+            @PathVariable("department-id") String departmentId
     ) {
         return ResponseEntity
                 .ok(gatewayService.getGatewaySummariesByDepartmentId(departmentId));
@@ -77,7 +77,7 @@ public class GatewayController {
                 .noContent()
                 .build();
     }
-      
+
     @PutMapping("/threshold-status")
     public ResponseEntity<Void> updateThresholdStatus(
             @RequestBody Long gatewayId
