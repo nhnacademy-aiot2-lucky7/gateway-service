@@ -103,7 +103,11 @@ public class Gateway {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateThresholdStatus(){
+    public void updateThresholdStatusEnabled() {
         this.thresholdStatus = true;
+    }
+
+    public void updateThresholdStatusDisabled() {
+        this.thresholdStatus = false;
     }
 }

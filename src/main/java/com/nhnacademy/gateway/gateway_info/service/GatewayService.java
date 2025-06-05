@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.gateway_info.service;
 
+import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
@@ -12,6 +13,12 @@ public interface GatewayService {
 
     long registerGateway(GatewayRegisterRequest request);
 
+    Gateway getGatewayByGatewayId(long gatewayId);
+
+    void updateThresholdStatusEnabledByGatewayId(Long gatewayId);
+
+    boolean isExistsGatewayId(long gatewayId);
+
     boolean isExistsGateway(GatewayRequest request);
 
     String getDepartmentIdByGatewayId(long gatewayId);
@@ -19,6 +26,4 @@ public interface GatewayService {
     List<Long> getGatewayIds();
 
     List<GatewayInfoResponse> getGateways(String departmentId);
-
-    void updateThresholdStatus(Long gatewayId);
 }

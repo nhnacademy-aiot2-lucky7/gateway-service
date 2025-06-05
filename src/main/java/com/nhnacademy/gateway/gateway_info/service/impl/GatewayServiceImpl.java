@@ -49,6 +49,20 @@ public class GatewayServiceImpl implements GatewayService {
                 .getGatewayId();
     }
 
+    @Override
+    public Gateway getGatewayByGatewayId(long gatewayId) {
+        return gatewayRepository.findById(gatewayId)
+                .orElseThrow(GatewayNotFoundException::new);
+    }
+
+    @Override
+    public void updateThresholdStatusEnabledByGatewayId(Long gatewayId) {
+        Gateway gateway = getGatewayByGatewayId(gatewayId);
+        gateway.updateThresholdStatusEnabled();
+        gatewayRepository.flush();
+    }
+
+    @Override
     public boolean isExistsGatewayId(long gatewayId) {
         return gatewayRepository.existsById(gatewayId);
     }
@@ -77,13 +91,5 @@ public class GatewayServiceImpl implements GatewayService {
     @Override
     public List<GatewayInfoResponse> getGateways(String departmentId) {
         return gatewayRepository.getGateways(departmentId);
-    }
-
-    @Override
-    public void updateThresholdStatus(Long gatewayId) {
-        Gateway gateway = gatewayRepository.findById(gatewayId).orElseThrow(GatewayNotFoundException::new);
-
-        gateway.updateThresholdStatus();
-        gatewayRepository.flush();
     }
 }
