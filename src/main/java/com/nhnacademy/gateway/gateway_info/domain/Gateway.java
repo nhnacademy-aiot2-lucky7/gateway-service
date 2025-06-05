@@ -108,4 +108,8 @@ public class Gateway {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateSensorCount(int sensorCount) {
+        this.sensorCount = sensorCount;
+    }
 }

@@ -10,11 +10,13 @@ import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class GatewayServiceImpl implements GatewayService {
 
     private final GatewayRepository gatewayRepository;
@@ -46,6 +48,19 @@ public class GatewayServiceImpl implements GatewayService {
         );
         return gatewayRepository.save(gateway)
                 .getGatewayId();
+    }
+
+    @Override
+    public Gateway getGatewayByGatewayId(long gatewayId) {
+        return gatewayRepository.findById(gatewayId)
+                .orElseThrow(GatewayNotFoundException::new);
+    }
+
+    @Override
+    public void updateSensorCountByGatewayId(long gatewayId, int sensorCount) {
+        Gateway gateway = getGatewayByGatewayId(gatewayId);
+        gateway.updateSensorCount(sensorCount);
+        gatewayRepository.flush();
     }
 
     public boolean isExistsGatewayId(long gatewayId) {
