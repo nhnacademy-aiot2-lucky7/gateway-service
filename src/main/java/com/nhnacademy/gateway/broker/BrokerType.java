@@ -1,6 +1,8 @@
-package com.nhnacademy.gateway.broker.mqtt.dto;
+package com.nhnacademy.gateway.broker;
 
 public enum BrokerType {
+
     CORE,
+
     INBOUND
 }

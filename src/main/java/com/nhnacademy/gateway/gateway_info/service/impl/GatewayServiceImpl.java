@@ -4,17 +4,20 @@ import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsException;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class GatewayServiceImpl implements GatewayService {
 
     private final GatewayRepository gatewayRepository;
@@ -41,10 +44,24 @@ public class GatewayServiceImpl implements GatewayService {
                 UUID.randomUUID().toString(),
                 request.getDepartmentId(),
                 request.getDescription(),
+                0,
                 false
         );
         return gatewayRepository.save(gateway)
                 .getGatewayId();
+    }
+
+    @Override
+    public Gateway getGatewayByGatewayId(long gatewayId) {
+        return gatewayRepository.findById(gatewayId)
+                .orElseThrow(GatewayNotFoundException::new);
+    }
+
+    @Override
+    public void updateSensorCountByGatewayId(long gatewayId, int sensorCount) {
+        Gateway gateway = getGatewayByGatewayId(gatewayId);
+        gateway.updateSensorCount(sensorCount);
+        gatewayRepository.flush();
     }
 
     public boolean isExistsGatewayId(long gatewayId) {
@@ -59,6 +76,7 @@ public class GatewayServiceImpl implements GatewayService {
         );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String getDepartmentIdByGatewayId(long gatewayId) {
         if (!isExistsGatewayId(gatewayId)) {
@@ -67,13 +85,21 @@ public class GatewayServiceImpl implements GatewayService {
         return gatewayRepository.getDepartmentIdByGatewayId(gatewayId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Long> getGatewayIds() {
         return gatewayRepository.getGatewayIds();
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<GatewayInfoResponse> getGateways(String departmentId) {
-        return gatewayRepository.getGateways(departmentId);
+    public List<GatewaySummaryResponse> getGatewaySummariesByDepartmentId(String departmentId) {
+        return gatewayRepository.findGatewaySummariesByDepartmentId(departmentId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<GatewayAdminSummaryResponse> getGatewayAdminSummaries() {
+        return gatewayRepository.findGatewayAdminSummaries();
     }
 }

@@ -49,6 +49,9 @@ public class Gateway {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
+    @Column(name = "sensor_count", nullable = false)
+    private Integer sensorCount;
+
     @Column(name = "threshold_status", columnDefinition = "tinyint")
     private Boolean thresholdStatus;
 
@@ -64,7 +67,7 @@ public class Gateway {
     private Gateway(
             String address, Integer port, IoTProtocol protocol,
             String gatewayName, String clientId, String departmentId,
-            String description, Boolean thresholdStatus
+            String description, Integer sensorCount, Boolean thresholdStatus
     ) {
         this.address = address;
         this.port = port;
@@ -73,13 +76,14 @@ public class Gateway {
         this.clientId = clientId;
         this.departmentId = departmentId;
         this.description = description;
+        this.sensorCount = sensorCount;
         this.thresholdStatus = thresholdStatus;
     }
 
     public static Gateway ofNewGateway(
             String address, Integer port, IoTProtocol protocol,
             String gatewayName, String clientId, String departmentId,
-            String description, Boolean thresholdStatus
+            String description, Integer sensorCount, Boolean thresholdStatus
     ) {
         return new Gateway(
                 address,
@@ -89,6 +93,7 @@ public class Gateway {
                 clientId,
                 departmentId,
                 description,
+                sensorCount,
                 thresholdStatus
         );
     }
@@ -96,10 +101,15 @@ public class Gateway {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateSensorCount(int sensorCount) {
+        this.sensorCount = sensorCount;
     }
 }
