@@ -1,6 +1,6 @@
 package com.nhnacademy.gateway.broker.mqtt;
 
-import com.nhnacademy.gateway.broker.mqtt.dto.BrokerType;
+import com.nhnacademy.gateway.broker.BrokerType;
 import com.nhnacademy.gateway.broker.mqtt.dto.MqttBroker;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
