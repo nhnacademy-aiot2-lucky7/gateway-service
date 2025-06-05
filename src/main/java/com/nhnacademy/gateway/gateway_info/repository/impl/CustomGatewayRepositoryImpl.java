@@ -5,8 +5,10 @@ import com.nhnacademy.gateway.broker.mqtt.dto.QMqttInboundBroker;
 import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.domain.QGateway;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
-import com.nhnacademy.gateway.gateway_info.dto.QGatewayInfoResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.QGatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.QGatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.CustomGatewayRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -62,25 +64,41 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
         );
     }
 
-    public List<GatewayInfoResponse> getGateways(String departmentId) {
+    @Override
+    public List<GatewaySummaryResponse> findGatewaySummariesByDepartmentId(String departmentId) {
         return queryFactory
                 .select(
-                        new QGatewayInfoResponse(
+                        new QGatewaySummaryResponse(
                                 qGateway.gatewayId,
-                                qGateway.address,
-                                qGateway.port,
-                                qGateway.protocol,
                                 qGateway.gatewayName,
-                                qGateway.clientId,
-                                qGateway.departmentId,
-                                qGateway.description,
-                                qGateway.createdAt,
-                                qGateway.updatedAt,
-                                qGateway.thresholdStatus
+                                qGateway.protocol,
+                                qGateway.sensorCount,
+                                qGateway.thresholdStatus,
+                                qGateway.updatedAt
                         )
                 )
                 .from(qGateway)
                 .where(qGateway.departmentId.eq(departmentId))
+                .orderBy(qGateway.createdAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<GatewayAdminSummaryResponse> findGatewayAdminSummaries() {
+        return queryFactory
+                .select(
+                        new QGatewayAdminSummaryResponse(
+                                qGateway.gatewayId,
+                                qGateway.gatewayName,
+                                qGateway.protocol,
+                                qGateway.departmentId,
+                                qGateway.sensorCount,
+                                qGateway.thresholdStatus,
+                                qGateway.updatedAt
+                        )
+                )
+                .from(qGateway)
+                .orderBy(qGateway.createdAt.desc())
                 .fetch();
     }
 }

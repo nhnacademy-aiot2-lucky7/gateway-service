@@ -1,7 +1,8 @@
 package com.nhnacademy.gateway.gateway_info.controller;
 
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayCountUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +27,12 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    @GetMapping("/department-id/{department-id}")
-    public ResponseEntity<List<GatewayInfoResponse>> getGateways(
-            @PathVariable("department-id") String departmentId
+    @GetMapping
+    public ResponseEntity<List<GatewaySummaryResponse>> getGatewaySummariesByDepartmentId(
+            @RequestBody String departmentId
     ) {
         return ResponseEntity
-                .ok(gatewayService.getGateways(departmentId));
+                .ok(gatewayService.getGatewaySummariesByDepartmentId(departmentId));
     }
 
     @GetMapping("/ids")
@@ -63,6 +64,16 @@ public class GatewayController {
                 .body(gatewayService.registerGateway(request));
     }
 
+    /// TODO: Sensor-Service만 접근할 수 있도록 구조를 추가
+    @PutMapping("/update-sensor-count")
+    public ResponseEntity<Void> updateGatewaySensorCount(
+            @Validated @RequestBody GatewayCountUpdateRequest request
+    ) {
+        gatewayService.updateSensorCountByGatewayId(
+                request.getGatewayId(),
+                request.getSensorCount()
+        );
+      
     @PutMapping("/threshold-status")
     public ResponseEntity<Void> updateThresholdStatus(
             @RequestBody Long gatewayId
