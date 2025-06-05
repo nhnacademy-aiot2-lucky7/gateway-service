@@ -64,6 +64,14 @@ public class GatewayServiceImpl implements GatewayService {
         gatewayRepository.flush();
     }
 
+    @Override
+    public void updateThresholdStatusEnabledByGatewayId(Long gatewayId) {
+        Gateway gateway = getGatewayByGatewayId(gatewayId);
+        gateway.updateThresholdStatusEnabled();
+        gatewayRepository.flush();
+    }
+
+    @Override
     public boolean isExistsGatewayId(long gatewayId) {
         return gatewayRepository.existsById(gatewayId);
     }

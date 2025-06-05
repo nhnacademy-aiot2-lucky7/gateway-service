@@ -2,6 +2,7 @@ package com.nhnacademy.gateway.gateway_info.service;
 
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
@@ -17,6 +18,10 @@ public interface GatewayService {
     Gateway getGatewayByGatewayId(long gatewayId);
 
     void updateSensorCountByGatewayId(long gatewayId, int sensorCount);
+  
+    void updateThresholdStatusEnabledByGatewayId(Long gatewayId);
+
+    boolean isExistsGatewayId(long gatewayId);
 
     boolean isExistsGateway(GatewayRequest request);
 

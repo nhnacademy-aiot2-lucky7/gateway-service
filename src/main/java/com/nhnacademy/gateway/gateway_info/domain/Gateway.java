@@ -112,4 +112,12 @@ public class Gateway {
     public void updateSensorCount(int sensorCount) {
         this.sensorCount = sensorCount;
     }
+  
+    public void updateThresholdStatusEnabled() {
+        this.thresholdStatus = true;
+    }
+
+    public void updateThresholdStatusDisabled() {
+        this.thresholdStatus = false;
+    }
 }
