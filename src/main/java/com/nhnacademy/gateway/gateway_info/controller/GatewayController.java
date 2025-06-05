@@ -73,6 +73,10 @@ public class GatewayController {
                 request.getGatewayId(),
                 request.getSensorCount()
         );
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
       
     @PutMapping("/threshold-status")
     public ResponseEntity<Void> updateThresholdStatus(
