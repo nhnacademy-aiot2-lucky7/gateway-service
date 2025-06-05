@@ -1,8 +1,8 @@
 package com.nhnacademy.gateway.gateway_info.service;
 
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayWebResponse;
 
 import java.util.List;
 
@@ -18,5 +18,5 @@ public interface GatewayService {
 
     List<Long> getGatewayIds();
 
-    List<GatewayInfoResponse> getGateways(String departmentId);
+    List<GatewayWebResponse> getWebGatewaysByDepartmentId(String departmentId);
 }

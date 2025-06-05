@@ -1,7 +1,7 @@
 package com.nhnacademy.gateway.gateway_info.controller;
 
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayWebResponse;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,12 +26,12 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    @GetMapping("/department-id/{department-id}")
-    public ResponseEntity<List<GatewayInfoResponse>> getGateways(
-            @PathVariable("department-id") String departmentId
+    @GetMapping
+    public ResponseEntity<List<GatewayWebResponse>> getWebGatewaysByDepartmentId(
+            @RequestBody String departmentId
     ) {
         return ResponseEntity
-                .ok(gatewayService.getGateways(departmentId));
+                .ok(gatewayService.getWebGatewaysByDepartmentId(departmentId));
     }
 
     @GetMapping("/ids")
@@ -62,5 +63,12 @@ public class GatewayController {
                 .body(gatewayService.registerGateway(request));
     }
 
+    @PutMapping("/update-count")
+    public ResponseEntity<Void> updateGatewaySensorCount(
 
+    ) {
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }
