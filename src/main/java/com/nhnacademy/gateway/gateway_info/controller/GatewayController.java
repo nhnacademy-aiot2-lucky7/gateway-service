@@ -66,6 +66,7 @@ public class GatewayController {
                 .body(gatewayService.registerGateway(request));
     }
 
+    /// TODO: Sensor-Service만 접근할 수 있도록 구조를 추가
     @PutMapping("/update-sensor-count")
     public ResponseEntity<Void> updateGatewaySensorCount(
             @Validated @RequestBody GatewayCountUpdateRequest request
