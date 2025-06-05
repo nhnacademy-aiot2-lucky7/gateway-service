@@ -5,8 +5,8 @@ import com.nhnacademy.gateway.broker.mqtt.dto.QMqttInboundBroker;
 import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.domain.QGateway;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayWebResponse;
-import com.nhnacademy.gateway.gateway_info.dto.QGatewayWebResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.QGatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.CustomGatewayRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -63,10 +63,10 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
     }
 
     @Override
-    public List<GatewayWebResponse> findWebGatewaysByDepartmentId(String departmentId) {
+    public List<GatewaySummaryResponse> findGatewaySummariesByDepartmentId(String departmentId) {
         return queryFactory
                 .select(
-                        new QGatewayWebResponse(
+                        new QGatewaySummaryResponse(
                                 qGateway.gatewayId,
                                 qGateway.gatewayName,
                                 qGateway.protocol,

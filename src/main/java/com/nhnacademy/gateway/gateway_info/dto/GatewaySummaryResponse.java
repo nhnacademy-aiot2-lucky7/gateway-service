@@ -9,7 +9,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public final class GatewayWebResponse {
+public final class GatewaySummaryResponse {
 
     private final long gatewayId;
 
@@ -29,7 +29,7 @@ public final class GatewayWebResponse {
     private final LocalDateTime updatedAt;
 
     @QueryProjection
-    public GatewayWebResponse(
+    public GatewaySummaryResponse(
             long gatewayId, String gatewayName, IoTProtocol ioTProtocol,
             int sensorCount, boolean thresholdStatus, LocalDateTime updatedAt
     ) {

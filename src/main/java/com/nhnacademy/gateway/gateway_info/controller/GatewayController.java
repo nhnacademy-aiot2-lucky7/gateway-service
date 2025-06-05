@@ -1,7 +1,7 @@
 package com.nhnacademy.gateway.gateway_info.controller;
 
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayWebResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +27,11 @@ public class GatewayController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GatewayWebResponse>> getWebGatewaysByDepartmentId(
+    public ResponseEntity<List<GatewaySummaryResponse>> getGatewaySummariesByDepartmentId(
             @RequestBody String departmentId
     ) {
         return ResponseEntity
-                .ok(gatewayService.getWebGatewaysByDepartmentId(departmentId));
+                .ok(gatewayService.getGatewaySummariesByDepartmentId(departmentId));
     }
 
     @GetMapping("/ids")

@@ -6,7 +6,7 @@ import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundExcept
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayWebResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.stereotype.Service;
@@ -74,7 +74,7 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public List<GatewayWebResponse> getWebGatewaysByDepartmentId(String departmentId) {
-        return gatewayRepository.findWebGatewaysByDepartmentId(departmentId);
+    public List<GatewaySummaryResponse> getGatewaySummariesByDepartmentId(String departmentId) {
+        return gatewayRepository.findGatewaySummariesByDepartmentId(departmentId);
     }
 }
