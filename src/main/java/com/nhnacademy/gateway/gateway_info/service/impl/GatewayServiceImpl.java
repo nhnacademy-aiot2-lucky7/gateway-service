@@ -4,6 +4,7 @@ import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsException;
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
@@ -75,6 +76,7 @@ public class GatewayServiceImpl implements GatewayService {
         );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String getDepartmentIdByGatewayId(long gatewayId) {
         if (!isExistsGatewayId(gatewayId)) {
@@ -83,13 +85,21 @@ public class GatewayServiceImpl implements GatewayService {
         return gatewayRepository.getDepartmentIdByGatewayId(gatewayId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Long> getGatewayIds() {
         return gatewayRepository.getGatewayIds();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<GatewaySummaryResponse> getGatewaySummariesByDepartmentId(String departmentId) {
         return gatewayRepository.findGatewaySummariesByDepartmentId(departmentId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<GatewayAdminSummaryResponse> getGatewayAdminSummaries() {
+        return gatewayRepository.findGatewayAdminSummaries();
     }
 }

@@ -4,7 +4,6 @@ import com.nhnacademy.gateway.gateway_info.dto.GatewayCountUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/gateways")
 public class GatewayController {

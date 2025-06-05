@@ -1,6 +1,7 @@
 package com.nhnacademy.gateway.gateway_info.service;
 
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
@@ -24,4 +25,6 @@ public interface GatewayService {
     List<Long> getGatewayIds();
 
     List<GatewaySummaryResponse> getGatewaySummariesByDepartmentId(String departmentId);
+
+    List<GatewayAdminSummaryResponse> getGatewayAdminSummaries();
 }
