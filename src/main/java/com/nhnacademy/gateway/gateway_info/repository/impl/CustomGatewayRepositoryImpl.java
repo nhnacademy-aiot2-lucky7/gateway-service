@@ -6,12 +6,12 @@ import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.domain.QGateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.dto.QGatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.QGatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.QGatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.CustomGatewayRepository;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
-import com.nhnacademy.gateway.infrastructure.dto.QGatewayDetailResponse;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
