@@ -1,10 +1,11 @@
 package com.nhnacademy.gateway.gateway_info.controller;
 
 import com.nhnacademy.gateway.gateway_info.dto.GatewayCountUpdateRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -71,6 +72,16 @@ public class GatewayController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(gatewayService.registerGateway(request));
+    }
+
+    @PutMapping
+    public ResponseEntity<Void> updateGatewayInfo(
+            @Validated @RequestBody GatewayUpdateRequest request
+    ) {
+        gatewayService.updateGatewayInfo(request);
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     /// TODO: Sensor-Service만 접근할 수 있도록 구조를 추가

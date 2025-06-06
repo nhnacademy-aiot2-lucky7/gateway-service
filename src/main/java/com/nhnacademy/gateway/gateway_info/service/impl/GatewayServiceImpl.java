@@ -5,14 +5,15 @@ import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsE
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import com.nhnacademy.gateway.infrastructure.adapter.SensorDataServiceAdapter;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
 import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetailResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,14 @@ public class GatewayServiceImpl implements GatewayService {
     public Gateway getGatewayByGatewayId(long gatewayId) {
         return gatewayRepository.findById(gatewayId)
                 .orElseThrow(GatewayNotFoundException::new);
+    }
+
+    @Override
+    public void updateGatewayInfo(GatewayUpdateRequest request) {
+        Gateway gateway = getGatewayByGatewayId(request.getGatewayId());
+        gateway.updateGatewayName(request.getGatewayName());
+        gateway.updateDescription(request.getDescription());
+        gatewayRepository.flush();
     }
 
     @Override
