@@ -5,10 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
-import lombok.ToString;
 
+/// TODO: validation 구조 개선 예정...
 @Getter
-@ToString
 public final class GatewayCountUpdateRequest {
 
     @NotNull

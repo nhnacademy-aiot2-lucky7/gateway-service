@@ -109,10 +109,18 @@ public class Gateway {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateGatewayName(String gatewayName) {
+        this.gatewayName = gatewayName;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
     public void updateSensorCount(int sensorCount) {
         this.sensorCount = sensorCount;
     }
-  
+
     public void updateThresholdStatusEnabled() {
         this.thresholdStatus = true;
     }

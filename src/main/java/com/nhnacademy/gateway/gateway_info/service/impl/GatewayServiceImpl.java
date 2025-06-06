@@ -5,11 +5,17 @@ import com.nhnacademy.gateway.common.exception.http.extend.GatewayAlreadyExistsE
 import com.nhnacademy.gateway.common.exception.http.extend.GatewayNotFoundException;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
+import com.nhnacademy.gateway.infrastructure.adapter.SensorDataServiceAdapter;
+import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetailResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +28,14 @@ public class GatewayServiceImpl implements GatewayService {
 
     private final GatewayRepository gatewayRepository;
 
-    public GatewayServiceImpl(GatewayRepository gatewayRepository) {
+    private final SensorDataServiceAdapter sensorDataServiceAdapter;
+
+    public GatewayServiceImpl(
+            GatewayRepository gatewayRepository,
+            SensorDataServiceAdapter sensorDataServiceAdapter
+    ) {
         this.gatewayRepository = gatewayRepository;
+        this.sensorDataServiceAdapter = sensorDataServiceAdapter;
     }
 
     @Override
@@ -55,6 +67,14 @@ public class GatewayServiceImpl implements GatewayService {
     public Gateway getGatewayByGatewayId(long gatewayId) {
         return gatewayRepository.findById(gatewayId)
                 .orElseThrow(GatewayNotFoundException::new);
+    }
+
+    @Override
+    public void updateGatewayInfo(GatewayUpdateRequest request) {
+        Gateway gateway = getGatewayByGatewayId(request.getGatewayId());
+        gateway.updateGatewayName(request.getGatewayName());
+        gateway.updateDescription(request.getDescription());
+        gatewayRepository.flush();
     }
 
     @Override
@@ -109,5 +129,25 @@ public class GatewayServiceImpl implements GatewayService {
     @Override
     public List<GatewayAdminSummaryResponse> getGatewayAdminSummaries() {
         return gatewayRepository.findGatewayAdminSummaries();
+    }
+
+    @Override
+    public GatewayDataDetailResponse getGatewayDetailsByGatewayId(long gatewayId) {
+        ResponseEntity<List<SensorDataDetailResponse>> responseEntity =
+                sensorDataServiceAdapter.getSensorDataDetailsByGatewayId(gatewayId);
+        List<SensorDataDetailResponse> sensors;
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            sensors = responseEntity.getBody();
+        } else {
+            sensors = List.of();
+        }
+
+        GatewayDetailResponse gateway = gatewayRepository.findGatewayDetailByGatewayId(gatewayId);
+
+        return new GatewayDataDetailResponse(
+                gateway,
+                sensors
+        );
     }
 }

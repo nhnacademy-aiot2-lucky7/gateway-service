@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 @Component
 public class ContextInterceptor implements HandlerInterceptor {
@@ -36,8 +35,13 @@ public class ContextInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    @Override
+    /*@Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        RoleContextHolder.clear();
+    }*/
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         RoleContextHolder.clear();
     }
 }

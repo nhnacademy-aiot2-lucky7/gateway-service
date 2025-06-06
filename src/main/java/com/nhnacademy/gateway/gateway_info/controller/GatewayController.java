@@ -1,8 +1,10 @@
 package com.nhnacademy.gateway.gateway_info.controller;
 
 import com.nhnacademy.gateway.gateway_info.dto.GatewayCountUpdateRequest;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +29,20 @@ public class GatewayController {
         this.gatewayService = gatewayService;
     }
 
-    @GetMapping
+    @GetMapping("/department/{department-id}")
     public ResponseEntity<List<GatewaySummaryResponse>> getGatewaySummariesByDepartmentId(
-            @RequestBody String departmentId
+            @PathVariable("department-id") String departmentId
     ) {
         return ResponseEntity
                 .ok(gatewayService.getGatewaySummariesByDepartmentId(departmentId));
+    }
+
+    @GetMapping("/{gateway-id}")
+    public ResponseEntity<GatewayDataDetailResponse> getGatewayDataDetailByGatewayId(
+            @PathVariable("gateway-id") Long gatewayId
+    ) {
+        return ResponseEntity
+                .ok(gatewayService.getGatewayDetailsByGatewayId(gatewayId));
     }
 
     @GetMapping("/ids")
@@ -64,6 +74,16 @@ public class GatewayController {
                 .body(gatewayService.registerGateway(request));
     }
 
+    @PutMapping
+    public ResponseEntity<Void> updateGatewayInfo(
+            @Validated @RequestBody GatewayUpdateRequest request
+    ) {
+        gatewayService.updateGatewayInfo(request);
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
     /// TODO: Sensor-Service만 접근할 수 있도록 구조를 추가
     @PutMapping("/update-sensor-count")
     public ResponseEntity<Void> updateGatewaySensorCount(
@@ -73,7 +93,11 @@ public class GatewayController {
                 request.getGatewayId(),
                 request.getSensorCount()
         );
-      
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
     @PutMapping("/threshold-status")
     public ResponseEntity<Void> updateThresholdStatus(
             @RequestBody Long gatewayId

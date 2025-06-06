@@ -6,8 +6,10 @@ import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.domain.QGateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.dto.QGatewayAdminSummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.QGatewayDetailResponse;
 import com.nhnacademy.gateway.gateway_info.dto.QGatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.repository.CustomGatewayRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -100,5 +102,29 @@ public class CustomGatewayRepositoryImpl extends QuerydslRepositorySupport imple
                 .from(qGateway)
                 .orderBy(qGateway.createdAt.desc())
                 .fetch();
+    }
+
+    @Override
+    public GatewayDetailResponse findGatewayDetailByGatewayId(long gatewayId) {
+        return queryFactory
+                .select(
+                        new QGatewayDetailResponse(
+                                qGateway.gatewayId,
+                                qGateway.address,
+                                qGateway.port,
+                                qGateway.protocol,
+                                qGateway.gatewayName,
+                                qGateway.clientId,
+                                qGateway.departmentId,
+                                qGateway.description,
+                                qGateway.sensorCount,
+                                qGateway.thresholdStatus,
+                                qGateway.createdAt,
+                                qGateway.updatedAt
+                        )
+                )
+                .from(qGateway)
+                .where(qGateway.gatewayId.eq(gatewayId))
+                .fetchOne();
     }
 }

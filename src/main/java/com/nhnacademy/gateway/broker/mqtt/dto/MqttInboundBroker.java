@@ -1,5 +1,6 @@
 package com.nhnacademy.gateway.broker.mqtt.dto;
 
+import com.nhnacademy.gateway.broker.BrokerType;
 import com.nhnacademy.gateway.common.enums.IoTProtocol;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
