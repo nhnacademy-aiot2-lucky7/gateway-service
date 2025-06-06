@@ -2,10 +2,10 @@ package com.nhnacademy.gateway.gateway_info.service;
 
 import com.nhnacademy.gateway.gateway_info.domain.Gateway;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayAdminSummaryResponse;
-import com.nhnacademy.gateway.gateway_info.dto.GatewayInfoResponse;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
 
 import java.util.List;
 
@@ -32,4 +32,6 @@ public interface GatewayService {
     List<GatewaySummaryResponse> getGatewaySummariesByDepartmentId(String departmentId);
 
     List<GatewayAdminSummaryResponse> getGatewayAdminSummaries();
+
+    GatewayDataDetailResponse getGatewayDetailsByGatewayId(long gatewayId);
 }

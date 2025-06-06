@@ -4,6 +4,7 @@ import com.nhnacademy.gateway.gateway_info.dto.GatewayCountUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewayRegisterRequest;
 import com.nhnacademy.gateway.gateway_info.dto.GatewaySummaryResponse;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
+import com.nhnacademy.gateway.gateway_info.dto.GatewayDataDetailResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +34,14 @@ public class GatewayController {
     ) {
         return ResponseEntity
                 .ok(gatewayService.getGatewaySummariesByDepartmentId(departmentId));
+    }
+
+    @GetMapping("/{gateway-id}")
+    public ResponseEntity<GatewayDataDetailResponse> getGatewayDataDetailByGatewayId(
+            @PathVariable("gateway-id") Long gatewayId
+    ) {
+        return ResponseEntity
+                .ok(gatewayService.getGatewayDetailsByGatewayId(gatewayId));
     }
 
     @GetMapping("/ids")
