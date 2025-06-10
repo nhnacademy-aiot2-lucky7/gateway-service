@@ -14,7 +14,7 @@ import com.nhnacademy.gateway.gateway_info.dto.GatewayUpdateRequest;
 import com.nhnacademy.gateway.gateway_info.repository.GatewayRepository;
 import com.nhnacademy.gateway.gateway_info.service.GatewayService;
 import com.nhnacademy.gateway.infrastructure.adapter.SensorDataServiceAdapter;
-import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetailResponse;
+import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,9 +133,9 @@ public class GatewayServiceImpl implements GatewayService {
 
     @Override
     public GatewayDataDetailResponse getGatewayDetailsByGatewayId(long gatewayId) {
-        ResponseEntity<List<SensorDataDetailResponse>> responseEntity =
+        ResponseEntity<List<SensorDataDetail>> responseEntity =
                 sensorDataServiceAdapter.getSensorDataDetailsByGatewayId(gatewayId);
-        List<SensorDataDetailResponse> sensors;
+        List<SensorDataDetail> sensors;
 
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             sensors = responseEntity.getBody();

@@ -45,7 +45,12 @@ public class GatewayDetailResponse {
     private LocalDateTime updatedAt;
 
     @QueryProjection
-    public GatewayDetailResponse(Long gatewayId, String address, Integer port, IoTProtocol protocol, String gatewayName, String clientId, String departmentId, String description, Integer sensorCount, Boolean thresholdStatus, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public GatewayDetailResponse(
+            Long gatewayId, String address, Integer port, IoTProtocol protocol,
+            String gatewayName, String clientId, String departmentId,
+            String description, Integer sensorCount, Boolean thresholdStatus,
+            LocalDateTime createdAt, LocalDateTime updatedAt
+    ) {
         this.gatewayId = gatewayId;
         this.address = address;
         this.port = port;

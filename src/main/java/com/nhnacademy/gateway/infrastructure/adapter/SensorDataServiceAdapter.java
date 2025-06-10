@@ -1,6 +1,6 @@
 package com.nhnacademy.gateway.infrastructure.adapter;
 
-import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetailResponse;
+import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetail;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ import java.util.List;
 public interface SensorDataServiceAdapter {
 
     @GetMapping("/sensor-data-mappings/gateway-id/{gateway-id}/sensors")
-    ResponseEntity<List<SensorDataDetailResponse>> getSensorDataDetailsByGatewayId(
+    ResponseEntity<List<SensorDataDetail>> getSensorDataDetailsByGatewayId(
             @PathVariable("gateway-id") Long gatewayId
     );
 }
