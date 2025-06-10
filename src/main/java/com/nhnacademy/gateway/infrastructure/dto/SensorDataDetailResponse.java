@@ -21,6 +21,8 @@ public final class SensorDataDetailResponse {
 
     private final String sensorSpot;
 
+    private final String status;
+
     @JsonCreator
     public SensorDataDetailResponse(
             @JsonProperty("sensor_data_no") Long sensorNo,
@@ -29,7 +31,8 @@ public final class SensorDataDetailResponse {
             @JsonProperty("sensor_name") String sensorName,
             @JsonProperty("type_en_name") String typeEnName,
             @JsonProperty("location") String sensorLocation,
-            @JsonProperty("spot") String sensorSpot
+            @JsonProperty("spot") String sensorSpot,
+            @JsonProperty("status") String status
     ) {
         this.sensorNo = sensorNo;
         this.gatewayId = gatewayId;
@@ -38,5 +41,6 @@ public final class SensorDataDetailResponse {
         this.typeEnName = typeEnName;
         this.sensorLocation = sensorLocation;
         this.sensorSpot = sensorSpot;
+        this.status = status;
     }
 }
