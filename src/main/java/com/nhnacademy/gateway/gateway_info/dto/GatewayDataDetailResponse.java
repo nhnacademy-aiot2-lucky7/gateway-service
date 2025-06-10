@@ -1,6 +1,6 @@
 package com.nhnacademy.gateway.gateway_info.dto;
 
-import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetailResponse;
+import com.nhnacademy.gateway.infrastructure.dto.SensorDataDetail;
 import lombok.Getter;
 
 import java.util.List;
@@ -10,11 +10,11 @@ public final class GatewayDataDetailResponse {
 
     private final GatewayDetailResponse gateway;
 
-    private final List<SensorDataDetailResponse> sensors;
+    private final List<SensorDataDetail> sensors;
 
     public GatewayDataDetailResponse(
             GatewayDetailResponse gateway,
-            List<SensorDataDetailResponse> sensors
+            List<SensorDataDetail> sensors
     ) {
         this.gateway = gateway;
         this.sensors = sensors;
