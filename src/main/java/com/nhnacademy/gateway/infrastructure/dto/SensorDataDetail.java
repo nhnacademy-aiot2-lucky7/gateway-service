@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
-public final class SensorDataDetailResponse {
+public final class SensorDataDetail {
 
     private final Long sensorNo;
 
@@ -24,7 +24,7 @@ public final class SensorDataDetailResponse {
     private final String status;
 
     @JsonCreator
-    public SensorDataDetailResponse(
+    public SensorDataDetail(
             @JsonProperty("sensor_data_no") Long sensorNo,
             @JsonProperty("gateway_id") Long gatewayId,
             @JsonProperty("sensor_id") String sensorId,
